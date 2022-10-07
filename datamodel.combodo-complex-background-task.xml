@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<itop_design xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.7">
+  <classes>
+    <class id="ComplexBackgroundTask" _delta="define">
+      <parent>DBObject</parent>
+      <properties>
+        <category/>
+        <abstract>true</abstract>
+        <db_table>priv_complex_background_task</db_table>
+        <naming>
+          <attributes>
+            <attribute id="name"/>
+          </attributes>
+        </naming>
+      </properties>
+      <fields>
+        <field id="name" xsi:type="AttributeString">
+          <sql>name</sql>
+          <default_value/>
+          <is_null_allowed>false</is_null_allowed>
+          <tracking_level>none</tracking_level>
+        </field>
+        <field id="current_action" xsi:type="AttributeString">
+          <sql>current_action</sql>
+          <default_value/>
+          <is_null_allowed>true</is_null_allowed>
+          <tracking_level>none</tracking_level>
+        </field>
+        <field id="action_params" xsi:type="AttributeText">
+          <sql>action_params</sql>
+          <default_value/>
+          <is_null_allowed>true</is_null_allowed>
+          <tracking_level>none</tracking_level>
+        </field>
+        <field id="context" xsi:type="AttributeText">
+          <sql>context</sql>
+          <default_value/>
+          <is_null_allowed>true</is_null_allowed>
+          <tracking_level>none</tracking_level>
+        </field>
+        <field id="status" xsi:type="AttributeEnum">
+          <sql>status</sql>
+          <is_null_allowed>false</is_null_allowed>
+          <default_value>created</default_value>
+          <tracking_level>none</tracking_level>
+          <values>
+            <value id="created">
+              <code>created</code>
+            </value>
+            <value id="running">
+              <code>running</code>
+            </value>
+            <value id="paused">
+              <code>paused</code>
+            </value>
+          </values>
+        </field>
+      </fields>
+      <methods/>
+      <presentation>
+        <list>
+          <items>
+            <item id="class_to_anonymize">
+              <rank>10</rank>
+            </item>
+            <item id="id_to_anonymize">
+              <rank>20</rank>
+            </item>
+            <item id="status">
+              <rank>60</rank>
+            </item>
+          </items>
+        </list>
+      </presentation>
+    </class>
+  </classes>
+</itop_design>

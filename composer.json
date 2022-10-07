@@ -1,0 +1,16 @@
+{
+  "config": {
+    "classmap-authoritative": true
+  },
+  "autoload": {
+    "psr-4": {
+      "Combodo\\iTop\\ComplexBackgroundTask\\": "src"
+    }
+  },
+  "name": "combodo/combodo-complex-background-task",
+  "type": "itop-extension",
+  "description": "Combodo complex background task",
+  "require": {
+    "composer-runtime-api": "^2.0"
+  }
+}
