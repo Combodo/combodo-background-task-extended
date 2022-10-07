@@ -6,9 +6,10 @@
 
 namespace Combodo\iTop\ComplexBackgroundTask\Test\Service;
 
+use Combodo\iTop\ComplexBackgroundTask\Action\ActionFactory;
 use DBObject;
 
-class CBTTestActionFactory extends \Combodo\iTop\ComplexBackgroundTask\Action\ActionFactory
+class CBTTestActionFactory extends ActionFactory
 {
 	private $aParamsArray = [];
 	private $iCurrAction;

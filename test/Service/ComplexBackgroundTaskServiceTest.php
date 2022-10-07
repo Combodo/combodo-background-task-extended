@@ -28,7 +28,6 @@ class ComplexBackgroundTaskServiceTest extends ItopDataTestCase
 		parent::setUp();
 		require_once 'CBTTestActionFactory.php';
 		require_once 'CBTTestAction.php';
-		require_once 'ComplexBackgroundTaskTest.php';
 		$this->TEST_LOG_FILE = APPROOT.'log/test.log';
 		ComplexBackgroundTaskLog::Enable($this->TEST_LOG_FILE);
 		@unlink($this->TEST_LOG_FILE);
@@ -70,7 +69,7 @@ class ComplexBackgroundTaskServiceTest extends ItopDataTestCase
 	}
 
 	/**
-	 * @dataProvider ProcessAnonymizationTaskProvider
+	 * @dataProvider ProcessTaskProvider
 	 * @param $sExpectedStatus
 	 * @param $sInitialStatus
 	 * @param $sInitialAction
@@ -84,26 +83,26 @@ class ComplexBackgroundTaskServiceTest extends ItopDataTestCase
 	 * @throws \CoreUnexpectedValue
 	 * @throws \ReflectionException
 	 */
-	public function testProcessAnonymizationTask($sExpectedStatus, $sInitialStatus, $sInitialAction, $sExpectedActionParams, $aActions, $aActionParams)
+	public function testProcessTask($sExpectedStatus, $sInitialStatus, $sInitialAction, $sExpectedActionParams, $aActions, $aActionParams)
 	{
 		$oService = new ComplexBackgroundTaskService(10);
 		// Parameters injection
 		$oService->SetActions($aActions);
 		$oService->SetActionFactory(new CBTTestActionFactory($aActionParams));
 
-		$oTask = MetaModel::NewObject('ComplexBackgroundTaskTest');
+		$oTask = MetaModel::NewObject('DefaultComplexBackgroundTask');
 		$oTask->Set('name', 'Test');
 		$oTask->Set('status', $sInitialStatus);
-		$oTask->Set('action', $sInitialAction);
+		$oTask->Set('current_action', $sInitialAction);
 		$oTask->Set('action_params', '');
 
-		$sStatus = $this->InvokeNonPublicMethod(ComplexBackgroundTaskService::class, 'ProcessAnonymizationTask', $oService, [$oTask]);
+		$sStatus = $this->InvokeNonPublicMethod(ComplexBackgroundTaskService::class, 'ProcessOneTask', $oService, [$oTask]);
 
 		$this->assertEquals($sExpectedStatus, $sStatus);
 		$this->assertEquals($sExpectedActionParams, $oTask->Get('action_params'));
 	}
 
-	public function ProcessAnonymizationTaskProvider()
+	public function ProcessTaskProvider()
 	{
 		return [
 			'no action'               => [

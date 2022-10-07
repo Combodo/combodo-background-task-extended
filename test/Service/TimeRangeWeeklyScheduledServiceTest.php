@@ -6,16 +6,29 @@
 
 namespace Combodo\iTop\ComplexBackgroundTask\Test\Service;
 
+use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskLog;
 use Combodo\iTop\ComplexBackgroundTask\Service\TimeRangeWeeklyScheduledService;
+use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 use DateTime;
-use PHPUnit\Framework\TestCase;
 
-class TimeRangeWeeklyScheduledServiceTest extends TestCase
+class TimeRangeWeeklyScheduledServiceTest extends ItopDataTestCase
 {
 	protected function setUp(): void
 	{
 		parent::setUp();
 		date_default_timezone_set('UTC');
+		$this->TEST_LOG_FILE = APPROOT.'log/test.log';
+		ComplexBackgroundTaskLog::Enable($this->TEST_LOG_FILE);
+		@unlink($this->TEST_LOG_FILE);
+	}
+
+	protected function tearDown(): void
+	{
+		parent::tearDown();
+		if (file_exists($this->TEST_LOG_FILE)) {
+			$sLogs = file_get_contents($this->TEST_LOG_FILE);
+			$this->debug($sLogs);
+		}
 	}
 
 	/**
@@ -30,7 +43,7 @@ class TimeRangeWeeklyScheduledServiceTest extends TestCase
 	 * @param $aDays
 	 *
 	 * @return void
-	 * @throws \Combodo\iTop\BackgroundTask\Helper\BackgroundTaskException
+	 * @throws \Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException
 	 */
 	public function testGetNextOccurrence($dExpected, $bEnabled, $sStartTime, $sEndTime, $sTimeLimit, $iCurrentTime, $aDays)
 	{

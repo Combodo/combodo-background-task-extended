@@ -54,11 +54,34 @@
       <presentation>
         <list>
           <items>
-            <item id="class_to_anonymize">
+            <item id="name">
               <rank>10</rank>
             </item>
-            <item id="id_to_anonymize">
-              <rank>20</rank>
+            <item id="status">
+              <rank>60</rank>
+            </item>
+          </items>
+        </list>
+      </presentation>
+    </class>
+    <class id="DefaultComplexBackgroundTask" _delta="define">
+      <parent>ComplexBackgroundTask</parent>
+      <properties>
+        <category/>
+        <abstract>false</abstract>
+        <db_table>priv_default_complex_background_task</db_table>
+        <naming>
+          <attributes>
+            <attribute id="name"/>
+          </attributes>
+        </naming>
+      </properties>
+      <methods/>
+      <presentation>
+        <list>
+          <items>
+            <item id="name">
+              <rank>10</rank>
             </item>
             <item id="status">
               <rank>60</rank>

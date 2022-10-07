@@ -6,11 +6,11 @@
 
 namespace Combodo\iTop\ComplexBackgroundTask\Test\Service;
 
-use Combodo\iTop\Anonymizer\Action\iAnonymizationAction;
+use Combodo\iTop\ComplexBackgroundTask\Action\iAction;
 use DBObject;
 use Exception;
 
-class CBTTestAction implements iAnonymizationAction
+class CBTTestAction implements iAction
 {
 	private $aParams = [];
 	private $oTask;

@@ -12,9 +12,6 @@ use DateTime;
 
 class TimeRangeWeeklyScheduledService
 {
-
-
-
 	/**
 	 * @param bool $bEnabled
 	 * @param string $sStartTime
