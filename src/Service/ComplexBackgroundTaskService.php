@@ -21,6 +21,7 @@ class ComplexBackgroundTaskService
 		$this->oActionFactory = new ActionFactory();
 		$this->iProcessEndTime = time() + 30;
 		$this->aActions = [];
+		ComplexBackgroundTaskLog::Enable(APPROOT.'log/error.log');
 	}
 
 	/**
@@ -111,7 +112,7 @@ class ComplexBackgroundTaskService
 						break;
 
 					case 'running':
-						$sAction = $oTask->Get('action');
+						$sAction = $oTask->Get('current_action');
 						ComplexBackgroundTaskLog::Debug("ProcessTask: status: $sStatus, action: $sAction");
 						$oAction = $this->oActionFactory->GetAction($sAction, $oTask, $this->iProcessEndTime);
 						if (is_null($oAction)) {
@@ -123,7 +124,7 @@ class ComplexBackgroundTaskService
 						break;
 
 					case 'paused':
-						$sAction = $oTask->Get('action');
+						$sAction = $oTask->Get('current_action');
 						ComplexBackgroundTaskLog::Debug("ProcessTask: status: $sStatus, action: $sAction");
 						$oAction = $this->oActionFactory->GetAction($sAction, $oTask, $this->iProcessEndTime);
 						if (is_null($oAction)) {
@@ -136,7 +137,7 @@ class ComplexBackgroundTaskService
 				if (!is_null($oAction)) {
 					$sStatus = 'running';
 					$oTask->Set('status', $sStatus);
-					$oTask->Set('action', $sAction);
+					$oTask->Set('current_action', $sAction);
 					$oTask->DBWrite();
 
 					$bActionFinished = $oAction->Execute();
