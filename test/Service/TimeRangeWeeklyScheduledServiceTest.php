@@ -40,7 +40,7 @@ class TimeRangeWeeklyScheduledServiceTest extends ItopTestCase
 	 * @param $sStartTime
 	 * @param $sEndTime
 	 * @param $sTimeLimit
-	 * @param $iCurrentTime
+	 * @param $sCurrentTime
 	 * @param $aDays
 	 *
 	 * @return void
@@ -60,7 +60,7 @@ class TimeRangeWeeklyScheduledServiceTest extends ItopTestCase
 		// 2022-10-07 is a friday
 		return [
 			'disabled' => ['3000-01-01', false, '00:30', '05:30', '2022-10-07 17:30', '2022-10-07 17:00', [1,2,3,4,5,6,7]],
-			'next 2s' => ['2022-10-08T00:30:00', true, '00:30', '05:30', '2022-10-07 17:30', '2022-10-07 17:00', [1,2,3,4,5,6,7]],
+			'next day' => ['2022-10-08T00:30:00', true, '00:30', '05:30', '2022-10-07 17:30', '2022-10-07 17:00', [1,2,3,4,5,6,7]],
 		];
 	}
 }
