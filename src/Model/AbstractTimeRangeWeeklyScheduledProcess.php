@@ -4,7 +4,8 @@
  * @license     http://opensource.org/licenses/AGPL-3.0
  */
 
-use Combodo\iTop\BackgroundTask\Service\TimeRangeWeeklyService;
+
+use Combodo\iTop\ComplexBackgroundTask\Service\TimeRangeWeeklyScheduledService;
 
 abstract class AbstractTimeRangeWeeklyScheduledProcess extends AbstractWeeklyScheduledProcess
 {
@@ -20,7 +21,7 @@ abstract class AbstractTimeRangeWeeklyScheduledProcess extends AbstractWeeklySch
 
 	public function GetNextOccurrence($sCurrentTime = 'now')
 	{
-		$oService = new TimeRangeWeeklyService();
+		$oService = new TimeRangeWeeklyScheduledService();
 		$bEnabled = MetaModel::GetConfig()->GetModuleSetting($this->GetModuleName(),	static::MODULE_SETTING_ENABLED,	static::DEFAULT_MODULE_SETTING_ENABLED);
 		$sStartTime = MetaModel::GetConfig()->GetModuleSetting($this->GetModuleName(), static::MODULE_SETTING_TIME,  $this->GetDefaultModuleSettingTime());
 		$sEndTime = MetaModel::GetModuleSetting($this->GetModuleName(), static::MODULE_SETTING_MAX_TIME,$this->GetDefaultModuleSettingEndTime());
