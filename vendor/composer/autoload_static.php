@@ -21,9 +21,6 @@ class ComposerStaticInit618e8d9b0dbca93a1c8a882432ef24bd
     );
 
     public static $classMap = array (
-        'Combodo\\iTop\\ComplexBackgroundTask\\Action\\AbstractAction' => __DIR__ . '/../..' . '/src/Action/AbstractAction.php',
-        'Combodo\\iTop\\ComplexBackgroundTask\\Action\\ActionFactory' => __DIR__ . '/../..' . '/src/Action/ActionFactory.php',
-        'Combodo\\iTop\\ComplexBackgroundTask\\Action\\iAction' => __DIR__ . '/../..' . '/src/Action/iAction.php',
         'Combodo\\iTop\\ComplexBackgroundTask\\Helper\\ComplexBackgroundTaskException' => __DIR__ . '/../..' . '/src/Helper/ComplexBackgroundTaskException.php',
         'Combodo\\iTop\\ComplexBackgroundTask\\Helper\\ComplexBackgroundTaskHelper' => __DIR__ . '/../..' . '/src/Helper/ComplexBackgroundTaskHelper.php',
         'Combodo\\iTop\\ComplexBackgroundTask\\Helper\\ComplexBackgroundTaskLog' => __DIR__ . '/../..' . '/src/Helper/ComplexBackgroundTaskLog.php',

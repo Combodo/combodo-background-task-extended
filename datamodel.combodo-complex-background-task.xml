@@ -20,17 +20,12 @@
           <is_null_allowed>false</is_null_allowed>
           <tracking_level>none</tracking_level>
         </field>
-        <field id="current_action" xsi:type="AttributeString">
-          <sql>current_action</sql>
-          <default_value/>
+        <field id="current_action_id" xsi:type="AttributeExternalKey">
+          <sql>current_action_id</sql>
+          <target_class>ComplexBackgroundTaskAction</target_class>
           <is_null_allowed>true</is_null_allowed>
           <tracking_level>none</tracking_level>
-        </field>
-        <field id="action_params" xsi:type="AttributeText">
-          <sql>action_params</sql>
-          <default_value/>
-          <is_null_allowed>true</is_null_allowed>
-          <tracking_level>none</tracking_level>
+          <on_target_delete>DEL_MANUAL</on_target_delete>
         </field>
         <field id="status" xsi:type="AttributeEnum">
           <sql>status</sql>
@@ -50,7 +45,33 @@
           </values>
         </field>
       </fields>
-      <methods/>
+      <methods>
+        <method id="GetNextAction">
+          <static>false</static>
+          <access>public</access>
+          <type>Overload-ExNihilo</type>
+          <code><![CDATA[
+       public function GetNextAction()
+       {
+            $sCurrentActionId = $this->Get('current_action_id');
+            if ($sCurrentActionId) {
+                // Remove current action
+                $this->Set('current_action_id', null);
+                $oAction = MetaModel::GetObject('ComplexBackgroundTaskAction', $sCurrentActionId);
+                $oAction->DBDelete();
+            }
+            $sId = $this->GetKey();
+            $oSet = new DBObjectSet(DBSearch::FromOQL("SELECT ComplexBackgroundTaskAction WHERE task_id=:id"), ['rank' => true], ['id' => $sId]);
+            $oSet->SetLimit(1);
+            $oAction = $oSet->Fetch();
+            $oActionId = is_null($oAction) ? null : $oAction->GetKey();
+            $this->Set('current_action_id', $oActionId);
+            $this->DBUpdate();
+            return $oAction;
+       }
+]]></code>
+        </method>
+      </methods>
       <presentation>
         <list>
           <items>
@@ -58,6 +79,107 @@
               <rank>10</rank>
             </item>
             <item id="status">
+              <rank>60</rank>
+            </item>
+          </items>
+        </list>
+      </presentation>
+    </class>
+    <class id="ComplexBackgroundTaskAction" _delta="define">
+      <parent>DBObject</parent>
+      <php_parent>
+        <name>AbstractComplexBackgroundTaskAction</name>
+      </php_parent>
+      <properties>
+        <category/>
+        <abstract>true</abstract>
+        <db_table>priv_complex_background_task_action</db_table>
+        <naming>
+          <attributes>
+            <attribute id="name"/>
+          </attributes>
+        </naming>
+      </properties>
+      <fields>
+        <field id="name" xsi:type="AttributeString">
+          <sql>name</sql>
+          <default_value/>
+          <is_null_allowed>false</is_null_allowed>
+          <tracking_level>none</tracking_level>
+        </field>
+        <field id="rank" xsi:type="AttributeInteger">
+          <sql>rank</sql>
+          <default_value>1</default_value>
+          <is_null_allowed>false</is_null_allowed>
+          <tracking_level>none</tracking_level>
+        </field>
+        <field id="task_id" xsi:type="AttributeExternalKey">
+          <sql>task_id</sql>
+          <target_class>ComplexBackgroundTask</target_class>
+          <is_null_allowed>true</is_null_allowed>
+          <tracking_level>none</tracking_level>
+          <on_target_delete>DEL_AUTO</on_target_delete>
+        </field>
+      </fields>
+      <methods>
+        <method id="InitActionParams">
+          <static>false</static>
+          <access>public</access>
+          <type>Overload-ExNihilo</type>
+          <comment>
+            /**
+            * Initialize the action and save specific data
+            */
+          </comment>
+          <code><![CDATA[
+       public function InitActionParams()
+       {
+       }
+]]></code>
+        </method>
+        <method id="ChangeActionParamsOnError">
+          <static>false</static>
+          <access>public</access>
+          <type>Overload-ExNihilo</type>
+          <comment>
+            /**
+            * Change the specific data to retry the action on error
+            */
+          </comment>
+          <code><![CDATA[
+       public function ChangeActionParamsOnError()
+       {
+       }
+]]></code>
+        </method>
+        <method id="ExecuteAction">
+          <static>false</static>
+          <access>public</access>
+          <type>Overload-ExNihilo</type>
+          <comment>
+            /**
+            * Execute the action using the specific data
+            * When execution stops after execution timeout, store the parameters for the next execution in the $oTask object.
+            *
+            * @param int iEndExecutionTime Unix timestamp of the end of execution
+            * @return bool true when action is finished, false if paused on execution timeout
+            */
+          </comment>
+          <code><![CDATA[
+       public function ExecuteAction($iEndExecutionTime)
+       {
+            return true;
+       }
+]]></code>
+        </method>
+      </methods>
+      <presentation>
+        <list>
+          <items>
+            <item id="name">
+              <rank>10</rank>
+            </item>
+            <item id="rank">
               <rank>60</rank>
             </item>
           </items>

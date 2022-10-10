@@ -5,22 +5,19 @@ namespace Combodo\iTop\ComplexBackgroundTask\Service;
 use Combodo\iTop\ComplexBackgroundTask\Action\ActionFactory;
 use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException;
 use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskLog;
-use DBObject;
+use ComplexBackgroundTask;
 use DBObjectSet;
 use DBSearch;
 use Exception;
+use MetaModel;
 
 class ComplexBackgroundTaskService
 {
-	private $oActionFactory;
 	private $iProcessEndTime;
-	private $aActions;
 
 	public function __construct()
 	{
-		$this->oActionFactory = new ActionFactory();
 		$this->iProcessEndTime = time() + 30;
-		$this->aActions = [];
 		ComplexBackgroundTaskLog::Enable(APPROOT.'log/error.log');
 	}
 
@@ -67,6 +64,7 @@ class ComplexBackgroundTaskService
 	{
 		$oSearch = DBSearch::FromOQL($sOQL);
 		$oSet = new DBObjectSet($oSearch);
+		/** @var ComplexBackgroundTask $oTask */
 		while ($oTask = $oSet->Fetch()) {
 			if ($this->IsTimeoutReached()) {
 				return false;
@@ -82,16 +80,16 @@ class ComplexBackgroundTaskService
 	}
 
 	/**
-	 * @param \DBObject $oTask (ResilientBackgroundTask)
+	 * @param \ComplexBackgroundTask $oTask (ResilientBackgroundTask)
 	 *
 	 * @return bool
 	 * @throws \ArchivedObjectException
 	 * @throws \CoreException
 	 */
-	protected function ProcessOneTask(DBObject $oTask)
+	protected function ProcessOneTask(ComplexBackgroundTask $oTask)
 	{
 		$sStatus = $oTask->Get('status');
-		/** @var \Combodo\iTop\ComplexBackgroundTask\Action\iAction $oAction */
+		/** @var \ComplexBackgroundTaskAction $oAction */
 		$oAction = null;
 		$sAction = null;
 		$bInProgress = true;
@@ -100,33 +98,27 @@ class ComplexBackgroundTaskService
 				switch ($sStatus) {
 					case 'created':
 					case 'finished':
-						$sAction = $this->GetNextAction($sAction);
-						ComplexBackgroundTaskLog::Debug("ProcessTask: status: $sStatus, action: $sAction");
-						$oAction = $this->oActionFactory->GetAction($sAction, $oTask, $this->iProcessEndTime);
+						$oAction = $oTask->GetNextAction();
 						if (is_null($oAction)) {
 							$sStatus = 'finished';
 							$bInProgress = false;
 						} else {
-							$oAction->Init();
+							$oAction->InitActionParams();
 						}
 						break;
 
 					case 'running':
-						$sAction = $oTask->Get('current_action');
-						ComplexBackgroundTaskLog::Debug("ProcessTask: status: $sStatus, action: $sAction");
-						$oAction = $this->oActionFactory->GetAction($sAction, $oTask, $this->iProcessEndTime);
+						$oAction = MetaModel::GetObject('ComplexBackgroundTaskAction', $oTask->Get('current_action_id'), false);
 						if (is_null($oAction)) {
 							$sStatus = 'finished';
 							$bInProgress = false;
 						} else {
-							$oAction->Retry();
+							$oAction->ChangeActionParamsOnError();
 						}
 						break;
 
 					case 'paused':
-						$sAction = $oTask->Get('current_action');
-						ComplexBackgroundTaskLog::Debug("ProcessTask: status: $sStatus, action: $sAction");
-						$oAction = $this->oActionFactory->GetAction($sAction, $oTask, $this->iProcessEndTime);
+						$oAction = MetaModel::GetObject('ComplexBackgroundTaskAction', $oTask->Get('current_action_id'), false);
 						if (is_null($oAction)) {
 							$sStatus = 'finished';
 							$bInProgress = false;
@@ -135,12 +127,14 @@ class ComplexBackgroundTaskService
 				}
 
 				if (!is_null($oAction)) {
+					$sAction = $oAction->Get('friendlyname');
+					ComplexBackgroundTaskLog::Debug("ProcessTask: status: $sStatus, action: $sAction");
 					$sStatus = 'running';
 					$oTask->Set('status', $sStatus);
 					$oTask->Set('current_action', $sAction);
 					$oTask->DBWrite();
 
-					$bActionFinished = $oAction->Execute();
+					$bActionFinished = $oAction->ExecuteAction($this->iProcessEndTime);
 					if ($bActionFinished) {
 						$sStatus = 'finished';
 					} else {
@@ -164,36 +158,9 @@ class ComplexBackgroundTaskService
 		return $sStatus;
 	}
 
-	protected function GetNextAction($sAction)
-	{
-		if (is_null($sAction)) {
-			if (isset($this->aActions[0])) {
-				return $this->aActions[0];
-			}
-		}
-
-		foreach ($this->aActions as $key => $sValue) {
-			if ($sValue == $sAction) {
-				if (isset($this->aActions[$key + 1])) {
-					return $this->aActions[$key + 1];
-				}
-			}
-		}
-
-		return null;
-	}
-
 	protected function IsTimeoutReached()
 	{
 		return (time() > $this->iProcessEndTime);
-	}
-
-	/**
-	 * @param \Combodo\iTop\ComplexBackgroundTask\Action\ActionFactory $oActionFactory
-	 */
-	public function SetActionFactory(ActionFactory $oActionFactory)
-	{
-		$this->oActionFactory = $oActionFactory;
 	}
 
 	/**
@@ -202,14 +169,6 @@ class ComplexBackgroundTaskService
 	public function SetProcessEndTime(int $iProcessEndTime)
 	{
 		$this->iProcessEndTime = $iProcessEndTime;
-	}
-
-	/**
-	 * @param array $aActions
-	 */
-	public function SetActions(array $aActions)
-	{
-		$this->aActions = $aActions;
 	}
 
 

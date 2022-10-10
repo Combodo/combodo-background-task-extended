@@ -6,9 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Combodo\\iTop\\ComplexBackgroundTask\\Action\\AbstractAction' => $baseDir . '/src/Action/AbstractAction.php',
-    'Combodo\\iTop\\ComplexBackgroundTask\\Action\\ActionFactory' => $baseDir . '/src/Action/ActionFactory.php',
-    'Combodo\\iTop\\ComplexBackgroundTask\\Action\\iAction' => $baseDir . '/src/Action/iAction.php',
     'Combodo\\iTop\\ComplexBackgroundTask\\Helper\\ComplexBackgroundTaskException' => $baseDir . '/src/Helper/ComplexBackgroundTaskException.php',
     'Combodo\\iTop\\ComplexBackgroundTask\\Helper\\ComplexBackgroundTaskHelper' => $baseDir . '/src/Helper/ComplexBackgroundTaskHelper.php',
     'Combodo\\iTop\\ComplexBackgroundTask\\Helper\\ComplexBackgroundTaskLog' => $baseDir . '/src/Helper/ComplexBackgroundTaskLog.php',
