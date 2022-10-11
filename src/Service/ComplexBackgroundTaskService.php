@@ -90,7 +90,6 @@ class ComplexBackgroundTaskService
 		$sStatus = $oTask->Get('status');
 		/** @var \ComplexBackgroundTaskAction $oAction */
 		$oAction = null;
-		$sAction = null;
 		$bInProgress = true;
 		while ($bInProgress) {
 			try {
@@ -127,7 +126,7 @@ class ComplexBackgroundTaskService
 
 				if (!is_null($oAction)) {
 					$sAction = $oAction->Get('friendlyname');
-					ComplexBackgroundTaskLog::Debug("ProcessTask: status: $sStatus, action: $sAction");
+					ComplexBackgroundTaskLog::Debug("ProcessTask: status: $sStatus, action: $sAction begin");
 					$sStatus = 'running';
 					$oTask->Set('status', $sStatus);
 					$oTask->DBWrite();
@@ -141,6 +140,7 @@ class ComplexBackgroundTaskService
 						$oTask->DBWrite();
 						$bInProgress = false;
 					}
+					ComplexBackgroundTaskLog::Debug("ProcessTask: status: $sStatus, action: $sAction end");
 				}
 			} catch (ComplexBackgroundTaskException $e) {
 				ComplexBackgroundTaskLog::Error('AnonymizerException'.$e->getMessage());
