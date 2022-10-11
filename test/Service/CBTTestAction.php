@@ -1,32 +1,37 @@
 <?php
+
+use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskLog;
+
 /**
  * @copyright   Copyright (C) 2010-2022 Combodo SARL
  * @license     http://opensource.org/licenses/AGPL-3.0
  */
 
-namespace Combodo\iTop\ComplexBackgroundTask\Test\Service;
 
-use Combodo\iTop\ComplexBackgroundTask\Action\iAction;
-use DBObject;
-use Exception;
-
-class CBTTestAction implements iAction
+class CBTTestAction extends ComplexBackgroundTaskAction
 {
-	private $aParams = [];
+	private $aParams;
 	private $oTask;
 
-	/**
-	 * @inheritDoc
-	 */
-	public function __construct(DBObject $oTask, $iEndExecutionTime)
+	public static function Init()
 	{
-		$this->oTask = $oTask;
-		$this->aParams = [
-			'Init' => 'Task1 init',
-			'Retry' => 'Task1 retry',
-			'Execute' => 'Task1 execute',
-			'ExecReturn' => true,
+		$aParams = [
+			'category' => '',
+			'key_type' => 'autoincrement',
+			'name_attcode' => ['name'],
+			'state_attcode' => '',
+			'reconc_keys' => [],
+			'db_table' => 'priv_complex_background_task_action_cbt_test',
+			'db_key_field' => 'id',
+			'db_finalclass_field' => 'finalclass',
 		];
+		MetaModel::Init_Params($aParams);
+		MetaModel::Init_InheritAttributes();
+
+		MetaModel::Init_SetZListItems('list', [
+			0 => 'name',
+			1 => 'rank',
+		]);
 	}
 
 	/**
@@ -38,10 +43,19 @@ class CBTTestAction implements iAction
 	}
 
 	/**
+	 * @param mixed $oTask
+	 */
+	public function SetTask($oTask)
+	{
+		$this->oTask = $oTask;
+	}
+
+	/**
 	 * @inheritDoc
 	 */
-	public function Init()
+	public function InitActionParams()
 	{
+		ComplexBackgroundTaskLog::Info('InitActionParams called');
 		if (isset($this->aParams['Init'])) {
 			$sValue = $this->oTask->Get('action_params').' - '.$this->aParams['Init'];
 			$this->oTask->Set('action_params', $sValue);
@@ -51,8 +65,9 @@ class CBTTestAction implements iAction
 	/**
 	 * @inheritDoc
 	 */
-	public function Retry()
+	public function ChangeActionParamsOnError()
 	{
+		ComplexBackgroundTaskLog::Info('ChangeActionParamsOnError called');
 		if (isset($this->aParams['Retry'])) {
 			$sValue = $this->oTask->Get('action_params').' - '.$this->aParams['Retry'];
 			$this->oTask->Set('action_params', $sValue);
@@ -62,8 +77,9 @@ class CBTTestAction implements iAction
 	/**
 	 * @inheritDoc
 	 */
-	public function Execute(): bool
+	public function ExecuteAction($iEndExecutionTime): bool
 	{
+		ComplexBackgroundTaskLog::Info('ExecuteAction called');
 		if (isset($this->aParams['Execute'])) {
 			$sValue = $this->oTask->Get('action_params').' - '.$this->aParams['Execute'];
 			$this->oTask->Set('action_params', $sValue);
@@ -78,6 +94,3 @@ class CBTTestAction implements iAction
 		return true;
 	}
 }
-
-class CBTTestAction2 extends CBTTestAction
-{}

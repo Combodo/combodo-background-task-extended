@@ -8,7 +8,6 @@ use ComplexBackgroundTask;
 use DBObjectSet;
 use DBSearch;
 use Exception;
-use MetaModel;
 
 class ComplexBackgroundTaskService
 {
@@ -106,7 +105,7 @@ class ComplexBackgroundTaskService
 						break;
 
 					case 'running':
-						$oAction = MetaModel::GetObject('ComplexBackgroundTaskAction', $oTask->Get('current_action_id'), false);
+						$oAction = $oTask->GetCurrentAction();
 						if (is_null($oAction)) {
 							$sStatus = 'finished';
 							$bInProgress = false;
@@ -116,7 +115,7 @@ class ComplexBackgroundTaskService
 						break;
 
 					case 'paused':
-						$oAction = MetaModel::GetObject('ComplexBackgroundTaskAction', $oTask->Get('current_action_id'), false);
+						$oAction = $oTask->GetCurrentAction();
 						if (is_null($oAction)) {
 							$sStatus = 'finished';
 							$bInProgress = false;

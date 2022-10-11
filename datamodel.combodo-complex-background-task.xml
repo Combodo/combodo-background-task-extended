@@ -46,6 +46,21 @@
         </field>
       </fields>
       <methods>
+        <method id="GetCurrentAction">
+          <static>false</static>
+          <access>public</access>
+          <type>Overload-ExNihilo</type>
+          <code><![CDATA[
+       public function GetCurrentAction()
+       {
+            $sCurrentActionId = $this->Get('current_action_id');
+            if ($sCurrentActionId) {
+                return MetaModel::GetObject('ComplexBackgroundTaskAction', $sCurrentActionId);
+            }
+            return null;
+       }
+]]></code>
+        </method>
         <method id="GetNextAction">
           <static>false</static>
           <access>public</access>
@@ -180,32 +195,6 @@
               <rank>10</rank>
             </item>
             <item id="rank">
-              <rank>60</rank>
-            </item>
-          </items>
-        </list>
-      </presentation>
-    </class>
-    <class id="DefaultComplexBackgroundTask" _delta="define">
-      <parent>ComplexBackgroundTask</parent>
-      <properties>
-        <category/>
-        <abstract>false</abstract>
-        <db_table>priv_default_complex_background_task</db_table>
-        <naming>
-          <attributes>
-            <attribute id="name"/>
-          </attributes>
-        </naming>
-      </properties>
-      <methods/>
-      <presentation>
-        <list>
-          <items>
-            <item id="name">
-              <rank>10</rank>
-            </item>
-            <item id="status">
               <rank>60</rank>
             </item>
           </items>

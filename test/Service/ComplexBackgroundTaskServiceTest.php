@@ -26,8 +26,16 @@ class ComplexBackgroundTaskServiceTest extends ItopDataTestCase
 	protected function setUp(): void
 	{
 		parent::setUp();
-		require_once 'CBTTestActionFactory.php';
+
+		$this->debug("----- Test ".$this->getName());
+
 		require_once 'CBTTestAction.php';
+		require_once 'CBTTestTask.php';
+
+		\CBTTestTask::Init();
+		\CBTTestAction::Init();
+
+
 		$this->TEST_LOG_FILE = APPROOT.'log/test.log';
 		ComplexBackgroundTaskLog::Enable($this->TEST_LOG_FILE);
 		@unlink($this->TEST_LOG_FILE);
@@ -35,41 +43,16 @@ class ComplexBackgroundTaskServiceTest extends ItopDataTestCase
 
 	protected function tearDown(): void
 	{
-		parent::tearDown();
 		if (file_exists($this->TEST_LOG_FILE)) {
 			$sLogs = file_get_contents($this->TEST_LOG_FILE);
 			$this->debug($sLogs);
 		}
+		parent::tearDown();
 	}
+
 
 	/**
-	 * @dataProvider GetNextActionProvider
-	 * @param $sExpectedAction
-	 * @param $sCurrentAction
-	 * @param $aActions
-	 *
-	 * @return void
-	 * @throws \ReflectionException
-	 */
-	public function testGetNextAction($sExpectedAction, $sCurrentAction, $aActions)
-	{
-		$oService = new ComplexBackgroundTaskService(0);
-		$oService->SetActions($aActions);
-		$this->assertEquals($sExpectedAction, $this->InvokeNonPublicMethod(ComplexBackgroundTaskService::class, 'GetNextAction', $oService, [$sCurrentAction]));
-	}
-
-	public function GetNextActionProvider()
-	{
-		return [
-			'empty' => [null, null, []],
-			'first' => ['action1', null, ['action1', 'action2']],
-			'2nd' => ['action2', 'action1', ['action1', 'action2']],
-			'last' => [null, 'action2', ['action1', 'action2']],
-		];
-	}
-
-	/**
-	 * @dataProvider ProcessTaskProvider
+	 * @dataProvider ProcessOneTaskProvider
 	 * @param $sExpectedStatus
 	 * @param $sInitialStatus
 	 * @param $sInitialAction
@@ -83,25 +66,36 @@ class ComplexBackgroundTaskServiceTest extends ItopDataTestCase
 	 * @throws \CoreUnexpectedValue
 	 * @throws \ReflectionException
 	 */
-	public function testProcessTask($sExpectedStatus, $sInitialStatus, $sInitialAction, $sExpectedActionParams, $aActions, $aActionParams)
+	public function testProcessOneTask($sExpectedStatus, $sInitialStatus, $sInitialAction, $sExpectedActionParams, $aActions, $aActionParams)
 	{
-		$oService = new ComplexBackgroundTaskService(10);
-		// Parameters injection
-		$oService->SetActions($aActions);
-		$oService->SetActionFactory(new CBTTestActionFactory($aActionParams));
+		$oService = new ComplexBackgroundTaskService();
+		ComplexBackgroundTaskLog::Enable($this->TEST_LOG_FILE);
 
-		$oTask = MetaModel::NewObject('DefaultComplexBackgroundTask');
+		/** @var \CBTTestTask $oTask */
+		$oTask = MetaModel::NewObject('CBTTestTask');
 		$oTask->Set('name', 'Test');
 		$oTask->Set('status', $sInitialStatus);
-		$oTask->Set('action_params', '');
+		if ($sInitialAction !== '') {
+			$oTask->Set('current_action_id', $sInitialAction);
+		}
+
+		$aTaskActions = [];
+		foreach ($aActions as $index => $sAction) {
+			/** @var \CBTTestAction $oAction */
+			$oAction = MetaModel::NewObject('CBTTestAction', ['name' => $sAction, 'rank' => $index]);
+			$oAction->SetParams($aActionParams[$index]);
+			$oAction->SetTask($oTask);
+			$aTaskActions[] = $oAction;
+		}
+		$oTask->SetActions($aTaskActions);
 
 		$sStatus = $this->InvokeNonPublicMethod(ComplexBackgroundTaskService::class, 'ProcessOneTask', $oService, [$oTask]);
 
-		$this->assertEquals($sExpectedStatus, $sStatus);
-		$this->assertEquals($sExpectedActionParams, $oTask->Get('action_params'));
+		$this->assertEquals($sExpectedStatus, $sStatus, 'Checking status');
+		$this->assertEquals($sExpectedActionParams, $oTask->Get('action_params'), 'Checking action_params');
 	}
 
-	public function ProcessTaskProvider()
+	public function ProcessOneTaskProvider()
 	{
 		return [
 			'no action'               => [
@@ -117,7 +111,7 @@ class ComplexBackgroundTaskServiceTest extends ItopDataTestCase
 				'created',
 				'',
 				' - Task1 init - Task1 execute',
-				['\Combodo\iTop\ComplexBackgroundTask\Test\Service\CBTTestAction'],
+				['Action1'],
 				[
 					[
 						'Init'       => 'Task1 init',
@@ -132,7 +126,7 @@ class ComplexBackgroundTaskServiceTest extends ItopDataTestCase
 				'created',
 				'',
 				' - Task1 init - Task1 execute',
-				['\Combodo\iTop\ComplexBackgroundTask\Test\Service\CBTTestAction'],
+				['Action1'],
 				[
 					[
 						'Init'       => 'Task1 init',
@@ -147,7 +141,7 @@ class ComplexBackgroundTaskServiceTest extends ItopDataTestCase
 				'created',
 				'',
 				' - Task1 init - Task1 execute',
-				['\Combodo\iTop\ComplexBackgroundTask\Test\Service\CBTTestAction'],
+				['Action1'],
 				[
 					[
 						'Init'       => 'Task1 init',
@@ -160,9 +154,9 @@ class ComplexBackgroundTaskServiceTest extends ItopDataTestCase
 			'one action continue' => [
 				'finished',
 				'paused',
-				'\Combodo\iTop\ComplexBackgroundTask\Test\Service\CBTTestAction',
+				'1',
 				' - Task1 execute',
-				['\Combodo\iTop\ComplexBackgroundTask\Test\Service\CBTTestAction'],
+				['Action1'],
 				[
 					[
 						'Init'       => 'Task1 init',
@@ -175,9 +169,9 @@ class ComplexBackgroundTaskServiceTest extends ItopDataTestCase
 			'one action retry on error' => [
 				'finished',
 				'running',
-				'\Combodo\iTop\ComplexBackgroundTask\Test\Service\CBTTestAction',
+				'1',
 				' - Task1 retry - Task1 execute',
-				['\Combodo\iTop\ComplexBackgroundTask\Test\Service\CBTTestAction'],
+				['Action1'],
 				[
 					[
 						'Init'       => 'Task1 init',
@@ -192,7 +186,7 @@ class ComplexBackgroundTaskServiceTest extends ItopDataTestCase
 				'created',
 				'',
 				' - Task1 init - Task1 execute - Task2 init - Task2 execute',
-				['\Combodo\iTop\ComplexBackgroundTask\Test\Service\CBTTestAction', '\Combodo\iTop\ComplexBackgroundTask\Test\Service\CBTTestAction2'],
+				['Action1', 'Action2'],
 				[
 					[
 						'Init'       => 'Task1 init',
@@ -213,7 +207,7 @@ class ComplexBackgroundTaskServiceTest extends ItopDataTestCase
 				'created',
 				'',
 				' - Task1 init - Task1 execute',
-				['\Combodo\iTop\ComplexBackgroundTask\Test\Service\CBTTestAction', '\Combodo\iTop\ComplexBackgroundTask\Test\Service\CBTTestAction2'],
+				['Action1', 'Action2'],
 				[
 					[
 						'Init'       => 'Task1 init',

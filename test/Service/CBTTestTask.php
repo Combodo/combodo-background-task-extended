@@ -1,0 +1,75 @@
+<?php
+
+use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskLog;
+
+/**
+ * @copyright   Copyright (C) 2010-2022 Combodo SARL
+ * @license     http://opensource.org/licenses/AGPL-3.0
+ */
+class CBTTestTask extends ComplexBackgroundTask
+{
+	private $aActions = [];
+
+	public static function Init()
+	{
+		$aParams = [
+			'category' => '',
+			'key_type' => 'autoincrement',
+			'name_attcode' => ['name'],
+			'state_attcode' => '',
+			'reconc_keys' => [],
+			'db_table' => 'priv_complex_background_task_cbt_test',
+			'db_key_field' => 'id',
+			'db_finalclass_field' => 'finalclass',
+		];
+		MetaModel::Init_Params($aParams);
+		MetaModel::Init_AddAttribute(new AttributeText('action_params', array('allowed_values' => null, 'sql' => 'action_params', 'default_value' => '', 'is_null_allowed' => true, 'depends_on' => array(), 'always_load_in_tables' => false, 'tracking_level' => ATTRIBUTE_TRACKING_NONE)));
+		MetaModel::Init_InheritAttributes();
+
+		MetaModel::Init_SetZListItems('list', [
+			0 => 'name',
+			1 => 'status',
+		]);
+	}
+
+	public function GetNextAction()
+	{
+		$iActionId = $this->Get('current_action_id');
+		ComplexBackgroundTaskLog::Info("GetNextAction: Current action is [$iActionId]");
+		if (!$iActionId) {
+			if (isset($this->aActions[0])) {
+				$this->Set('current_action_id', 1);
+				return $this->aActions[0];
+			}
+			return null;
+		}
+		$iActionId++;
+		if (isset($this->aActions[$iActionId-1])) {
+			$this->Set('current_action_id', $iActionId);
+			return $this->aActions[$iActionId-1];
+		}
+		return null;
+	}
+
+	public function GetCurrentAction()
+	{
+		$iActionId = $this->Get('current_action_id');
+		if (!$iActionId) {
+			return null;
+		}
+		return $this->aActions[$iActionId-1];
+	}
+
+	public function DBWrite()
+	{
+	}
+
+	/**
+	 * @param array $aActions
+	 */
+	public function SetActions(array $aActions)
+	{
+		$this->aActions = $aActions;
+	}
+
+}
