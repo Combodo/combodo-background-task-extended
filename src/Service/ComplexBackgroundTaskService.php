@@ -2,7 +2,6 @@
 
 namespace Combodo\iTop\ComplexBackgroundTask\Service;
 
-use Combodo\iTop\ComplexBackgroundTask\Action\ActionFactory;
 use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException;
 use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskLog;
 use ComplexBackgroundTask;
@@ -131,7 +130,6 @@ class ComplexBackgroundTaskService
 					ComplexBackgroundTaskLog::Debug("ProcessTask: status: $sStatus, action: $sAction");
 					$sStatus = 'running';
 					$oTask->Set('status', $sStatus);
-					$oTask->Set('current_action', $sAction);
 					$oTask->DBWrite();
 
 					$bActionFinished = $oAction->ExecuteAction($this->iProcessEndTime);

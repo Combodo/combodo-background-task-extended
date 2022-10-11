@@ -93,7 +93,6 @@ class ComplexBackgroundTaskServiceTest extends ItopDataTestCase
 		$oTask = MetaModel::NewObject('DefaultComplexBackgroundTask');
 		$oTask->Set('name', 'Test');
 		$oTask->Set('status', $sInitialStatus);
-		$oTask->Set('current_action', $sInitialAction);
 		$oTask->Set('action_params', '');
 
 		$sStatus = $this->InvokeNonPublicMethod(ComplexBackgroundTaskService::class, 'ProcessOneTask', $oService, [$oTask]);
