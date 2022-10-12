@@ -39,6 +39,11 @@ class TimeRangeWeeklyScheduledService
 		list($sHours, $sMinutes) = explode(':', $this->sEndTime);
 		$dEndToday->setTime((int)$sHours, (int)$sMinutes);
 		$iEndTimeToday = $dEndToday->getTimestamp();
+		if($dEndToday<$iCurrentTime){
+			//the end time is tomorrow, we have to change the day
+			$dEndToday->modify('+1 days');
+			$iEndTimeToday = $dEndToday->getTimestamp();
+		}
 
 		ComplexBackgroundTaskLog::Debug("End time: $this->sEndTime");
 		ComplexBackgroundTaskLog::Debug("Next occurrence: $iEndTimeToday");
@@ -46,7 +51,7 @@ class TimeRangeWeeklyScheduledService
 		ComplexBackgroundTaskLog::Debug("current time: $iCurrentTime");
 
 		// IF FINISH next time is tomorrow TODO ????
-		if ($iCurrentTime < $this->sTimeLimit || $iCurrentTime > $iEndTimeToday) {
+		if ($iCurrentTime > $iEndTimeToday) {
 			return $this->GetNextOccurrenceNextDay($iCurrentTime);
 		} else {
 			//TRY ANOTHER TIME next time is 2 seconds  later
@@ -76,6 +81,20 @@ class TimeRangeWeeklyScheduledService
 		}
 		$oNow = new DateTime();
 		$oNow->setTimeStamp($iCurrentTime);
+
+		$oStartToday = clone $oNow;
+		list($sHours, $sMinutes) = explode(':', $this->sStartTime);
+		$oStartToday->setTime((int)$sHours, (int)$sMinutes);
+
+		//case next time is today because start time is before midnight
+		if ($oNow < $oStartToday) {
+			//test if today is a valid day
+			$iDay = $oNow->format('N');
+			if (in_array($iDay, $this->aDays)) {
+				return $oStartToday;
+			}
+		}
+
 		$iNextPos = false;
 		for ($iDay = $oNow->format('N'); $iDay <= 7; $iDay++) {
 			$iNextPos = array_search($iDay, $this->aDays);

@@ -46,16 +46,14 @@ class TimeRangeWeeklyScheduledServiceTest extends ItopTestCase
 	 * @return void
 	 * @throws \Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException
 	 */
-	public function testGetNextOccurrence($sExpected, $bEnabled, $sStartTime, $sEndTime, $sTimeLimit, $sCurrentTime, $aDays)
+	public function testGetNextOccurrence($sExpected, $bEnabled, $sStartTime, $sEndTime, $sCurrentTime, $aDays)
 	{
 		$oAnonymizerService = new TimeRangeWeeklyScheduledService();
-		$iTimeLimit = date_format(date_create( $sTimeLimit), 'U');
 		$iCurrentTime = date_format(date_create($sCurrentTime), 'U');
 		$oExpected = new DateTime($sExpected);
 		$oAnonymizerService->SetEnabled($bEnabled);
 		$oAnonymizerService->SetStartTime($sStartTime);
 		$oAnonymizerService->SetEndTime($sEndTime);
-		$oAnonymizerService->SetTimeLimit($iTimeLimit);
 		$oAnonymizerService->SetDays($aDays);
 		$this->assertEquals($oExpected, $oAnonymizerService->GetNextOccurrence($iCurrentTime));
 	}
@@ -64,8 +62,10 @@ class TimeRangeWeeklyScheduledServiceTest extends ItopTestCase
 	{
 		// 2022-10-07 is a friday
 		return [
-			'disabled' => ['3000-01-01', false, '00:30', '05:30', '2022-10-07 17:30', '2022-10-07 17:00', [1,2,3,4,5,6,7]],
-			'next day' => ['2022-10-08T00:30:00', true, '00:30', '05:30', '2022-10-07 17:30', '2022-10-07 17:00', [1,2,3,4,5,6,7]],
+			'disabled' => ['3000-01-01', false, '00:30', '05:30', '2022-10-07 17:00', [1,2,3,4,5,6,7]],
+			'next day' => ['2022-10-08T00:30:00', true, '00:30', '05:30', '2022-10-07 17:00', [1,2,3,4,5,6,7]],
+			'next is today' => ['2022-10-07T23:30:00', true, '23:30', '05:30', '2022-10-07 17:00', [1,2,3,4,5,6,7]],
+			'next is in 2 sec' => ['2022-10-07T03:00:02', true, '23:30', '05:30', '2022-10-07 3:00', [1,2,3,4,5,6,7]],
 		];
 	}
 }
