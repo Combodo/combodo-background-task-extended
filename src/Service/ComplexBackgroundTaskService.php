@@ -29,20 +29,23 @@ class ComplexBackgroundTaskService
 	 * @throws \OQLException
 	 * @throws \ArchivedObjectException
 	 */
-	public function ProcessTasks($sClass): bool
+	public function ProcessTasks($sClass, &$sMessage): bool
 	{
+		if (is_null($sMessage)) {
+			$sMessage = '';
+		}
 		// Process Error tasks first
-		if (!$this->ProcessTaskList("SELECT `$sClass` WHERE status = 'running'")) {
+		if (!$this->ProcessTaskList("SELECT `$sClass` WHERE status = 'running'", $sMessage)) {
 			return false;
 		}
 
 		// Process paused tasks
-		if (!$this->ProcessTaskList("SELECT `$sClass` WHERE status = 'paused'")) {
+		if (!$this->ProcessTaskList("SELECT `$sClass` WHERE status = 'paused'", $sMessage)) {
 			return false;
 		}
 
 		// New tasks to process
-		return $this->ProcessTaskList("SELECT `$sClass` WHERE status = 'created'");
+		return $this->ProcessTaskList("SELECT `$sClass` WHERE status = 'created'", $sMessage);
 	}
 
 	/**
@@ -58,7 +61,7 @@ class ComplexBackgroundTaskService
 	 * @throws \MySQLHasGoneAwayException
 	 * @throws \OQLException
 	 */
-	protected function ProcessTaskList(string $sOQL): bool
+	protected function ProcessTaskList(string $sOQL, &$sMessage): bool
 	{
 		$oSearch = DBSearch::FromOQL($sOQL);
 		$oSet = new DBObjectSet($oSearch);
@@ -68,6 +71,7 @@ class ComplexBackgroundTaskService
 				return false;
 			}
 			if ($this->ProcessOneTask($oTask) == 'finished') {
+				$sMessage .= $oTask->Get('message');
 				$oTask->DBDelete();
 			} else {
 				return false;
