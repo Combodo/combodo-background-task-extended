@@ -12,77 +12,42 @@ use DateTime;
 
 class TimeRangeWeeklyScheduledService
 {
+	private $bEnabled;
+	private $sStartTime;
+	private $sEndTime;
+	private $sTimeLimit;
+	private $aDays;
+
 	/**
-	 * @param bool $bEnabled
-	 * @param string $sStartTime
-	 * @param string $sEndTime
-	 * @param string $sTimeLimit
 	 * @param int $iCurrentTime
-	 * @param array $aDays
 	 *
 	 * @return \DateTime
 	 * @throws \Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException
 	 */
-	public function GetNextOccurrence($bEnabled, $sStartTime, $sEndTime, $sTimeLimit, $iCurrentTime, $aDays)
+	public function GetNextOccurrence($iCurrentTime)
 	{
-		if (!$bEnabled) {
+		if (!$this->bEnabled) {
 			//if background process is disabled
 			return new DateTime('3000-01-01');
 		}
 
-		if (!preg_match('/[0-2][0-9]:[0-5][0-9]/', $sEndTime)) {
-			throw new ComplexBackgroundTaskException("Wrong format for setting 'end time' (found '$sEndTime')");
+		if (!preg_match('/[0-2][0-9]:[0-5][0-9]/', $this->sEndTime)) {
+			throw new ComplexBackgroundTaskException("Wrong format for setting 'end time' (found '$this->sEndTime')");
 		}
 		$dEndToday = new DateTime();
 		$dEndToday->setTimeStamp($iCurrentTime);
-		list($sHours, $sMinutes) = explode(':', $sEndTime);
+		list($sHours, $sMinutes) = explode(':', $this->sEndTime);
 		$dEndToday->setTime((int)$sHours, (int)$sMinutes);
 		$iEndTimeToday = $dEndToday->getTimestamp();
 
-		ComplexBackgroundTaskLog::Debug("End time: $sEndTime");
+		ComplexBackgroundTaskLog::Debug("End time: $this->sEndTime");
 		ComplexBackgroundTaskLog::Debug("Next occurrence: $iEndTimeToday");
-		ComplexBackgroundTaskLog::Debug("time limit: $sTimeLimit");
+		ComplexBackgroundTaskLog::Debug("time limit: $this->sTimeLimit");
 		ComplexBackgroundTaskLog::Debug("current time: $iCurrentTime");
 
 		// IF FINISH next time is tomorrow TODO ????
-		if ($iCurrentTime < $sTimeLimit || $iCurrentTime > $iEndTimeToday) {
-			ComplexBackgroundTaskLog::Debug('Next day'  );
-
-			// Find the next active week day
-			if (!preg_match('/[0-2][0-9]:[0-5][0-9]/', $sStartTime)) {
-				throw new ComplexBackgroundTaskException("Wrong format for setting 'start time' (found '$sStartTime')");
-			}
-			$oNow = new DateTime();
-			$oNow->setTimeStamp($iCurrentTime);
-			$iNextPos = false;
-			for ($iDay = $oNow->format('N'); $iDay <= 7; $iDay++) {
-				$iNextPos = array_search($iDay, $aDays);
-				if ($iNextPos !== false) {
-					if (($iDay > $oNow->format('N')) || ($oNow->format('H:i') < $sStartTime)) {
-						break;
-					}
-					$iNextPos = false; // necessary on sundays
-				}
-			}
-
-			// 3rd - Compute the result
-			//
-			if ($iNextPos === false) {
-				// Jump to the first day within the next week
-				$iFirstDayOfWeek = $aDays[0];
-				$iDayMove = $oNow->format('N') - $iFirstDayOfWeek;
-				$oRet = clone $oNow;
-				$oRet->modify('-'.$iDayMove.' days');
-				$oRet->modify('+1 weeks');
-			} else {
-				$iNextDayOfWeek = $aDays[$iNextPos];
-				$iMove = $iNextDayOfWeek - $oNow->format('N');
-				$oRet = clone $oNow;
-				$oRet->modify('+'.$iMove.' days');
-			}
-			list($sHours, $sMinutes) = explode(':', $sStartTime);
-			$oRet->setTime((int)$sHours, (int)$sMinutes);
-			return $oRet;
+		if ($iCurrentTime < $this->sTimeLimit || $iCurrentTime > $iEndTimeToday) {
+			return $this->GetNextOccurrenceNextDay($iCurrentTime);
 		} else {
 			//TRY ANOTHER TIME next time is 2 seconds  later
 			ComplexBackgroundTaskLog::Debug('Later'  );
@@ -94,4 +59,94 @@ class TimeRangeWeeklyScheduledService
 			return $oPlannedStart;
 		}
 	}
+
+	/**
+	 * @param int $iCurrentTime
+	 *
+	 * @return \DateTime
+	 * @throws \Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException
+	 */
+	public function GetNextOccurrenceNextDay(int $iCurrentTime): DateTime
+	{
+		ComplexBackgroundTaskLog::Debug('Next day');
+
+		// Find the next active week day
+		if (!preg_match('/[0-2][0-9]:[0-5][0-9]/', $this->sStartTime)) {
+			throw new ComplexBackgroundTaskException("Wrong format for setting 'start time' (found '$this->sStartTime')");
+		}
+		$oNow = new DateTime();
+		$oNow->setTimeStamp($iCurrentTime);
+		$iNextPos = false;
+		for ($iDay = $oNow->format('N'); $iDay <= 7; $iDay++) {
+			$iNextPos = array_search($iDay, $this->aDays);
+			if ($iNextPos !== false) {
+				if (($iDay > $oNow->format('N')) || ($oNow->format('H:i') < $this->sStartTime)) {
+					break;
+				}
+				$iNextPos = false; // necessary on sundays
+			}
+		}
+
+		// 3rd - Compute the result
+		//
+		if ($iNextPos === false) {
+			// Jump to the first day within the next week
+			$iFirstDayOfWeek = $this->aDays[0];
+			$iDayMove = $oNow->format('N') - $iFirstDayOfWeek;
+			$oRet = clone $oNow;
+			$oRet->modify('-'.$iDayMove.' days');
+			$oRet->modify('+1 weeks');
+		} else {
+			$iNextDayOfWeek = $this->aDays[$iNextPos];
+			$iMove = $iNextDayOfWeek - $oNow->format('N');
+			$oRet = clone $oNow;
+			$oRet->modify('+'.$iMove.' days');
+		}
+		list($sHours, $sMinutes) = explode(':', $this->sStartTime);
+		$oRet->setTime((int)$sHours, (int)$sMinutes);
+
+		return $oRet;
+	}
+
+	/**
+	 * @param bool $bEnabled
+	 */
+	public function SetEnabled(bool $bEnabled)
+	{
+		$this->bEnabled = $bEnabled;
+	}
+
+	/**
+	 * @param string $sStartTime
+	 */
+	public function SetStartTime(string $sStartTime)
+	{
+		$this->sStartTime = $sStartTime;
+	}
+
+	/**
+	 * @param string $sEndTime
+	 */
+	public function SetEndTime(string $sEndTime)
+	{
+		$this->sEndTime = $sEndTime;
+	}
+
+	/**
+	 * @param string $sTimeLimit
+	 */
+	public function SetTimeLimit(string $sTimeLimit)
+	{
+		$this->sTimeLimit = $sTimeLimit;
+	}
+
+	/**
+	 * @param array $aDays
+	 */
+	public function SetDays(array $aDays)
+	{
+		$this->aDays = $aDays;
+	}
+
+
 }

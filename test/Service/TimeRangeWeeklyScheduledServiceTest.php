@@ -52,7 +52,12 @@ class TimeRangeWeeklyScheduledServiceTest extends ItopTestCase
 		$iTimeLimit = date_format(date_create( $sTimeLimit), 'U');
 		$iCurrentTime = date_format(date_create($sCurrentTime), 'U');
 		$oExpected = new DateTime($sExpected);
-		$this->assertEquals($oExpected, $oAnonymizerService->GetNextOccurrence($bEnabled, $sStartTime, $sEndTime, $iTimeLimit, $iCurrentTime, $aDays));
+		$oAnonymizerService->SetEnabled($bEnabled);
+		$oAnonymizerService->SetStartTime($sStartTime);
+		$oAnonymizerService->SetEndTime($sEndTime);
+		$oAnonymizerService->SetTimeLimit($iTimeLimit);
+		$oAnonymizerService->SetDays($aDays);
+		$this->assertEquals($oExpected, $oAnonymizerService->GetNextOccurrence($iCurrentTime));
 	}
 
 	public function GetNextOccurrenceProvider()

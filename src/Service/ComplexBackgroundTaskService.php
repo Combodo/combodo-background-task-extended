@@ -29,20 +29,20 @@ class ComplexBackgroundTaskService
 	 * @throws \OQLException
 	 * @throws \ArchivedObjectException
 	 */
-	public function ProcessTasks($sClass)
+	public function ProcessTasks($sClass): bool
 	{
 		// Process Error tasks first
 		if (!$this->ProcessTaskList("SELECT `$sClass` WHERE status = 'running'")) {
-			return;
+			return false;
 		}
 
 		// Process paused tasks
 		if (!$this->ProcessTaskList("SELECT `$sClass` WHERE status = 'paused'")) {
-			return;
+			return false;
 		}
 
 		// New tasks to process
-		$this->ProcessTaskList("SELECT `$sClass` WHERE status = 'created'");
+		return $this->ProcessTaskList("SELECT `$sClass` WHERE status = 'created'");
 	}
 
 	/**
