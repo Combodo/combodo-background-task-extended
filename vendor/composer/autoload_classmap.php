@@ -10,6 +10,7 @@ return array(
     'Combodo\\iTop\\ComplexBackgroundTask\\Helper\\ComplexBackgroundTaskHelper' => $baseDir . '/src/Helper/ComplexBackgroundTaskHelper.php',
     'Combodo\\iTop\\ComplexBackgroundTask\\Helper\\ComplexBackgroundTaskLog' => $baseDir . '/src/Helper/ComplexBackgroundTaskLog.php',
     'Combodo\\iTop\\ComplexBackgroundTask\\Service\\ComplexBackgroundTaskService' => $baseDir . '/src/Service/ComplexBackgroundTaskService.php',
+    'Combodo\\iTop\\ComplexBackgroundTask\\Service\\DatabaseService' => $baseDir . '/src/Service/DatabaseService.php',
     'Combodo\\iTop\\ComplexBackgroundTask\\Service\\TimeRangeWeeklyScheduledService' => $baseDir . '/src/Service/TimeRangeWeeklyScheduledService.php',
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
 );
