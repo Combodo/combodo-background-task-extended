@@ -49,6 +49,7 @@ class DatabaseProcessRuleTest extends ItopDataTestCase
 		$oRule = DatabaseProcessRule::GetPurgeRuleFromOQL($sOQL);
 		$this->assertEquals($sExpSearchQuery, $oRule->GetSearchQuery());
 		$this->assertEquals($sExpKey, $oRule->GetKey());
+		$this->debug($oRule->GetApplyQueries());
 	}
 
 	public function FromOQLProvider()

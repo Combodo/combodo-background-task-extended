@@ -77,10 +77,12 @@ class DatabaseService
 		CMDBSource::Query('START TRANSACTION');
 		try {
 			$sTempTable = static::TEMPORARY_TABLE;
-			CMDBSource::Query("DROP TEMPORARY TABLE IF EXISTS `$sTempTable`");
-			$sSQL = "CREATE TEMPORARY TABLE `$sTempTable` ($sSqlSearch AND `$sSearchKey` > $sProgress ORDER BY `$sSearchKey` LIMIT $iMaxChunkSize)";
-			ComplexBackgroundTaskLog::Debug($sSQL);
-			CMDBSource::Query($sSQL);
+
+			$aQueries = $this->BuildQuerySet($sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $sProgress, $iMaxChunkSize);
+			foreach ($aQueries['search'] as $sSQL) {
+				ComplexBackgroundTaskLog::Debug($sSQL);
+				CMDBSource::Query($sSQL);
+			}
 
 			$oResult = CMDBSource::Query("SELECT COUNT(*) AS COUNT, MAX(`$sSearchKey`) AS MAX FROM `$sTempTable`");
 			$aRow = $oResult->fetch_assoc();
@@ -88,15 +90,11 @@ class DatabaseService
 			$sId = $aRow['MAX'];
 
 			if ($iCount > 0) {
-				foreach ($aSqlApply as $sTable => $sSqlUpdate) {
-					$sPattern = "/`?$sTable`?/";
-					$sReplacement = "`$sTable` JOIN `$sTempTable` ON `$sTable`.`$sKey` = `$sTempTable`.`$sSearchKey`";
-					$sSQL = preg_replace($sPattern, $sReplacement, $sSqlUpdate, 1);
+				foreach ($aQueries['delete'] as $sSQL) {
 					ComplexBackgroundTaskLog::Debug($sSQL);
 					CMDBSource::Query($sSQL);
 				}
 			}
-			CMDBSource::Query("DROP TEMPORARY TABLE IF EXISTS $sTempTable");
 			CMDBSource::Query('COMMIT');
 			// Save progression
 			$sProgress = $sId;
@@ -131,6 +129,27 @@ class DatabaseService
 
 		// not completed yet
 		return false;
+	}
+
+	public function BuildQuerySet(string $sSearchKey, string $sSqlSearch, array $aSqlApply, string $sKey, string $sProgress, int $iMaxChunkSize): array
+	{
+		$aRequests = [];
+		$sTempTable = static::TEMPORARY_TABLE;
+		$aRequests['search'] = [
+			"DROP TEMPORARY TABLE IF EXISTS `$sTempTable`",
+			"CREATE TEMPORARY TABLE `$sTempTable` ($sSqlSearch AND `$sSearchKey` > $sProgress ORDER BY `$sSearchKey` LIMIT $iMaxChunkSize)",
+		];
+
+		$aDeleteQueries = [];
+		foreach ($aSqlApply as $sTable => $sSqlUpdate) {
+			$sPattern = "/`?$sTable`?/";
+			$sReplacement = "`$sTable` JOIN `$sTempTable` ON `$sTable`.`$sKey` = `$sTempTable`.`$sSearchKey`";
+			$aDeleteQueries[] = preg_replace($sPattern, $sReplacement, $sSqlUpdate, 1);
+		}
+		$aDeleteQueries[] = "DROP TEMPORARY TABLE IF EXISTS $sTempTable";
+		$aRequests['delete'] = $aDeleteQueries;
+
+		return $aRequests;
 	}
 
 	/**
