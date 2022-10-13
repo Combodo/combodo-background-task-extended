@@ -39,7 +39,6 @@ class TimeRangeWeeklyScheduledServiceTest extends ItopTestCase
 	 * @param $bEnabled
 	 * @param $sStartTime
 	 * @param $sEndTime
-	 * @param $sTimeLimit
 	 * @param $sCurrentTime
 	 * @param $aDays
 	 *
@@ -90,7 +89,7 @@ class TimeRangeWeeklyScheduledServiceTest extends ItopTestCase
 			'range 2 before start time open previous closed current day same week' => ['2022-10-09 23:30:00', true, '23:30', '05:30', '2022-10-07 17:00', [1, 3, 4, 7]],
 			'range 2 before end time open previous closed current day same week'   => ['2022-10-07 03:00:10', true, '23:30', '05:30', '2022-10-07 03:00', [1, 3, 4, 7]],
 			'range 2 before end time closed previous closed current day same week' => ['2022-10-09 23:30:00', true, '23:30', '05:30', '2022-10-07 03:00', [1, 3, 7]],
-			'range 2 before end time closed previous open current day same week'   => ['2022-10-09 23:30:00', true, '23:30', '05:30', '2022-10-07 03:00', [1, 3, 5, 7]],
+			'range 2 before end time closed previous open current day same week'   => ['2022-10-07 23:30:00', true, '23:30', '05:30', '2022-10-07 03:00', [1, 3, 5, 7]],
 			'range 2 after start time open previous closed current day same week'  => ['2022-10-09 23:30:00', true, '23:30', '05:30', '2022-10-07 23:50', [1, 3, 4, 7]],
 			'range 2 after start time closed previous closed current day same week'=> ['2022-10-09 23:30:00', true, '23:30', '05:30', '2022-10-07 23:50', [1, 3, 7]],
 
@@ -98,7 +97,6 @@ class TimeRangeWeeklyScheduledServiceTest extends ItopTestCase
 			'range 2 before start time open previous closed current day next week' => ['2022-10-11 23:30:00', true, '23:30', '05:30', '2022-10-07 17:00', [2, 3, 4]],
 			'range 2 before end time open previous closed current day next week'   => ['2022-10-07 03:00:10', true, '23:30', '05:30', '2022-10-07 03:00', [2, 3, 4]],
 			'range 2 before end time closed previous closed current day next week' => ['2022-10-11 23:30:00', true, '23:30', '05:30', '2022-10-07 03:00', [2, 3]],
-			'range 2 before end time closed previous open current day next week'   => ['2022-10-11 23:30:00', true, '23:30', '05:30', '2022-10-07 03:00', [2, 3, 5]],
 			'range 2 after start time open previous closed current day next week'  => ['2022-10-11 23:30:00', true, '23:30', '05:30', '2022-10-07 23:50', [2, 3, 4]],
 			'range 2 after start time closed previous closed current day next week'=> ['2022-10-11 23:30:00', true, '23:30', '05:30', '2022-10-07 23:50', [2, 3]],
 		];

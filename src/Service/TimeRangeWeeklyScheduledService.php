@@ -68,7 +68,7 @@ class TimeRangeWeeklyScheduledService
 					$oPlannedStart->modify("+ $this->iAllowedRangeTimeStep seconds");
 				} else {
 					// Start another allowed day
-					$oPlannedStart = $this->GetNextOccurrenceNextDay($iCurrentTime);
+					$oPlannedStart = $this->GetNextOccurrenceNextDay($iCurrentTime - 86400);
 				}
 			} else {
 				if ($this->IsAllowedDay($iCurrentTime)) {
