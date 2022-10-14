@@ -1,62 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <itop_design xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.7">
-  <classes>
-    <class id="ComplexBackgroundTask" _delta="define">
-      <parent>DBObject</parent>
-      <properties>
-        <category/>
-        <abstract>true</abstract>
-        <db_table>priv_complex_background_task</db_table>
-        <naming>
-          <attributes>
-            <attribute id="name"/>
-          </attributes>
-        </naming>
-      </properties>
-      <fields>
-        <field id="name" xsi:type="AttributeString">
-          <sql>name</sql>
-          <default_value/>
-          <is_null_allowed>false</is_null_allowed>
-          <tracking_level>none</tracking_level>
-        </field>
-        <field id="current_action_id" xsi:type="AttributeExternalKey">
-          <sql>current_action_id</sql>
-          <target_class>ComplexBackgroundTaskAction</target_class>
-          <is_null_allowed>true</is_null_allowed>
-          <tracking_level>none</tracking_level>
-          <on_target_delete>DEL_MANUAL</on_target_delete>
-        </field>
-        <field id="message" xsi:type="AttributeText">
-          <sql>message</sql>
-          <default_value/>
-          <is_null_allowed>true</is_null_allowed>
-          <tracking_level>none</tracking_level>
-        </field>
-        <field id="status" xsi:type="AttributeEnum">
-          <sql>status</sql>
-          <is_null_allowed>false</is_null_allowed>
-          <default_value>created</default_value>
-          <tracking_level>none</tracking_level>
-          <values>
-            <value id="created">
-              <code>created</code>
-            </value>
-            <value id="running">
-              <code>running</code>
-            </value>
-            <value id="paused">
-              <code>paused</code>
-            </value>
-          </values>
-        </field>
-      </fields>
-      <methods>
-        <method id="GetCurrentAction">
-          <static>false</static>
-          <access>public</access>
-          <type>Overload-ExNihilo</type>
-          <code><![CDATA[
+	<classes>
+		<class id="ComplexBackgroundTask" _delta="define">
+			<parent>DBObject</parent>
+			<properties>
+				<category/>
+				<abstract>true</abstract>
+				<db_table>priv_complex_background_task</db_table>
+				<naming>
+					<attributes>
+						<attribute id="name"/>
+					</attributes>
+				</naming>
+			</properties>
+			<fields>
+				<field id="name" xsi:type="AttributeString">
+					<sql>name</sql>
+					<default_value/>
+					<is_null_allowed>false</is_null_allowed>
+					<tracking_level>none</tracking_level>
+				</field>
+				<field id="current_action_id" xsi:type="AttributeExternalKey">
+					<sql>current_action_id</sql>
+					<target_class>ComplexBackgroundTaskAction</target_class>
+					<is_null_allowed>true</is_null_allowed>
+					<tracking_level>none</tracking_level>
+					<on_target_delete>DEL_MANUAL</on_target_delete>
+				</field>
+				<field id="message" xsi:type="AttributeText">
+					<sql>message</sql>
+					<default_value/>
+					<is_null_allowed>true</is_null_allowed>
+					<tracking_level>none</tracking_level>
+				</field>
+				<field id="status" xsi:type="AttributeEnum">
+					<sql>status</sql>
+					<is_null_allowed>false</is_null_allowed>
+					<default_value>created</default_value>
+					<tracking_level>none</tracking_level>
+					<values>
+						<value id="created">
+							<code>created</code>
+						</value>
+						<value id="running">
+							<code>running</code>
+						</value>
+						<value id="paused">
+							<code>paused</code>
+						</value>
+					</values>
+				</field>
+			</fields>
+			<methods>
+				<method id="GetCurrentAction">
+					<static>false</static>
+					<access>public</access>
+					<type>Overload-ExNihilo</type>
+					<code><![CDATA[
        public function GetCurrentAction()
        {
             $sCurrentActionId = $this->Get('current_action_id');
@@ -66,12 +66,12 @@
             return null;
        }
 ]]></code>
-        </method>
-        <method id="GetNextAction">
-          <static>false</static>
-          <access>public</access>
-          <type>Overload-ExNihilo</type>
-          <code><![CDATA[
+				</method>
+				<method id="GetNextAction">
+					<static>false</static>
+					<access>public</access>
+					<type>Overload-ExNihilo</type>
+					<code><![CDATA[
        public function GetNextAction()
        {
             $sCurrentActionId = $this->Get('current_action_id');
@@ -91,121 +91,129 @@
             return $oAction;
        }
 ]]></code>
-        </method>
-      </methods>
-      <presentation>
-        <list>
-          <items>
-            <item id="name">
-              <rank>10</rank>
-            </item>
-            <item id="status">
-              <rank>60</rank>
-            </item>
-          </items>
-        </list>
-      </presentation>
-    </class>
-    <class id="ComplexBackgroundTaskAction" _delta="define">
-      <parent>DBObject</parent>
-      <php_parent>
-        <name>AbstractComplexBackgroundTaskAction</name>
-      </php_parent>
-      <properties>
-        <category/>
-        <abstract>true</abstract>
-        <db_table>priv_complex_background_task_action</db_table>
-        <naming>
-          <attributes>
-            <attribute id="name"/>
-          </attributes>
-        </naming>
-      </properties>
-      <fields>
-        <field id="name" xsi:type="AttributeString">
-          <sql>name</sql>
-          <default_value/>
-          <is_null_allowed>false</is_null_allowed>
-          <tracking_level>none</tracking_level>
-        </field>
-        <field id="rank" xsi:type="AttributeInteger">
-          <sql>rank</sql>
-          <default_value>1</default_value>
-          <is_null_allowed>false</is_null_allowed>
-          <tracking_level>none</tracking_level>
-        </field>
-        <field id="task_id" xsi:type="AttributeExternalKey">
-          <sql>task_id</sql>
-          <target_class>ComplexBackgroundTask</target_class>
-          <is_null_allowed>true</is_null_allowed>
-          <tracking_level>none</tracking_level>
-          <on_target_delete>DEL_AUTO</on_target_delete>
-        </field>
-      </fields>
-      <methods>
-        <method id="InitActionParams">
-          <static>false</static>
-          <access>public</access>
-          <type>Overload-ExNihilo</type>
-          <comment>
-            /**
-            * Initialize the action and save specific data
-            */
-          </comment>
-          <code><![CDATA[
+				</method>
+			</methods>
+			<presentation>
+				<list>
+					<items>
+						<item id="name">
+							<rank>10</rank>
+						</item>
+						<item id="status">
+							<rank>60</rank>
+						</item>
+					</items>
+				</list>
+			</presentation>
+		</class>
+		<class id="ComplexBackgroundTaskAction" _delta="define">
+			<parent>DBObject</parent>
+			<php_parent>
+				<name>AbstractComplexBackgroundTaskAction</name>
+			</php_parent>
+			<properties>
+				<category/>
+				<abstract>true</abstract>
+				<db_table>priv_complex_background_task_action</db_table>
+				<naming>
+					<attributes>
+						<attribute id="name"/>
+					</attributes>
+				</naming>
+			</properties>
+			<fields>
+				<field id="name" xsi:type="AttributeString">
+					<sql>name</sql>
+					<default_value/>
+					<is_null_allowed>false</is_null_allowed>
+					<tracking_level>none</tracking_level>
+				</field>
+				<field id="rank" xsi:type="AttributeInteger">
+					<sql>rank</sql>
+					<default_value>1</default_value>
+					<is_null_allowed>false</is_null_allowed>
+					<tracking_level>none</tracking_level>
+				</field>
+				<field id="task_id" xsi:type="AttributeExternalKey">
+					<sql>task_id</sql>
+					<target_class>ComplexBackgroundTask</target_class>
+					<is_null_allowed>true</is_null_allowed>
+					<tracking_level>none</tracking_level>
+					<on_target_delete>DEL_AUTO</on_target_delete>
+				</field>
+			</fields>
+			<methods>
+				<method id="InitActionParams">
+					<static>false</static>
+					<access>public</access>
+					<type>Overload-ExNihilo</type>
+					<comment>
+						/**
+						* Initialize the action and save specific data
+						*/
+					</comment>
+					<code><![CDATA[
        public function InitActionParams()
        {
        }
 ]]></code>
-        </method>
-        <method id="ChangeActionParamsOnError">
-          <static>false</static>
-          <access>public</access>
-          <type>Overload-ExNihilo</type>
-          <comment>
-            /**
-            * Change the specific data to retry the action on error
-            */
-          </comment>
-          <code><![CDATA[
+				</method>
+				<method id="ChangeActionParamsOnError">
+					<static>false</static>
+					<access>public</access>
+					<type>Overload-ExNihilo</type>
+					<comment>
+						/**
+						* Change the specific data to retry the action on error
+						*/
+					</comment>
+					<code><![CDATA[
        public function ChangeActionParamsOnError()
        {
        }
 ]]></code>
-        </method>
-        <method id="ExecuteAction">
-          <static>false</static>
-          <access>public</access>
-          <type>Overload-ExNihilo</type>
-          <comment>
-            /**
-            * Execute the action using the specific data
-            * When execution stops after execution timeout, store the parameters for the next execution in the $oTask object.
-            *
-            * @param int iEndExecutionTime Unix timestamp of the end of execution
-            * @return bool true when action is finished, false if paused on execution timeout
-            */
-          </comment>
-          <code><![CDATA[
+				</method>
+				<method id="ExecuteAction">
+					<static>false</static>
+					<access>public</access>
+					<type>Overload-ExNihilo</type>
+					<comment>
+						/**
+						* Execute the action using the specific data
+						* When execution stops after execution timeout, store the parameters for the next execution in the $oTask object.
+						*
+						* @param int iEndExecutionTime Unix timestamp of the end of execution
+						* @return bool true when action is finished, false if paused on execution timeout
+						*/
+					</comment>
+					<code><![CDATA[
        public function ExecuteAction($iEndExecutionTime)
        {
             return true;
        }
 ]]></code>
-        </method>
-      </methods>
-      <presentation>
-        <list>
-          <items>
-            <item id="name">
-              <rank>10</rank>
-            </item>
-            <item id="rank">
-              <rank>60</rank>
-            </item>
-          </items>
-        </list>
-      </presentation>
-    </class>
-  </classes>
+				</method>
+			</methods>
+			<presentation>
+				<list>
+					<items>
+						<item id="name">
+							<rank>10</rank>
+						</item>
+						<item id="rank">
+							<rank>60</rank>
+						</item>
+					</items>
+				</list>
+			</presentation>
+		</class>
+	</classes>
+	<module_parameters>
+		<parameters id="combodo-complex-background-task" _delta="define">
+			<time>01:00</time>
+			<end_time>05:30</end_time>
+			<max_execution_time>30</max_execution_time>
+			<week_days>sunday</week_days>
+		</parameters>
+	</module_parameters>
 </itop_design>

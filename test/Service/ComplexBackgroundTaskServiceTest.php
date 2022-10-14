@@ -29,11 +29,11 @@ class ComplexBackgroundTaskServiceTest extends ItopDataTestCase
 
 		$this->debug("----- Test ".$this->getName());
 
-		require_once 'CBTTestAction.php';
-		require_once 'CBTTestTask.php';
+		require_once 'MockTestAction.php';
+		require_once 'MockTestTask.php';
 
-		\CBTTestTask::Init();
-		\CBTTestAction::Init();
+		\MockTestTask::Init();
+		\MockTestAction::Init();
 
 
 		$this->TEST_LOG_FILE = APPROOT.'log/test.log';
@@ -71,8 +71,8 @@ class ComplexBackgroundTaskServiceTest extends ItopDataTestCase
 		$oService = new ComplexBackgroundTaskService();
 		ComplexBackgroundTaskLog::Enable($this->TEST_LOG_FILE);
 
-		/** @var \CBTTestTask $oTask */
-		$oTask = MetaModel::NewObject('CBTTestTask');
+		/** @var \MockTestTask $oTask */
+		$oTask = MetaModel::NewObject('MockTestTask');
 		$oTask->Set('name', 'Test');
 		$oTask->Set('status', $sInitialStatus);
 		if ($sInitialAction !== '') {
@@ -81,8 +81,8 @@ class ComplexBackgroundTaskServiceTest extends ItopDataTestCase
 
 		$aTaskActions = [];
 		foreach ($aActions as $index => $sAction) {
-			/** @var \CBTTestAction $oAction */
-			$oAction = MetaModel::NewObject('CBTTestAction', ['name' => $sAction, 'rank' => $index]);
+			/** @var \MockTestAction $oAction */
+			$oAction = MetaModel::NewObject('MockTestAction', ['name' => $sAction, 'rank' => $index]);
 			$oAction->SetParams($aActionParams[$index]);
 			$oAction->SetTask($oTask);
 			$aTaskActions[] = $oAction;

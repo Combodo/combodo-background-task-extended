@@ -14,7 +14,7 @@ use MySQLHasGoneAwayException;
 
 class DatabaseService
 {
-	const TEMPORARY_TABLE = 'priv_temporary_ids';
+	const TEMPORARY_TABLE = 'priv_temporary_ids_';
 
 	private $bUseTemporaryTable;
 
@@ -76,9 +76,9 @@ class DatabaseService
 		$sId = $sProgress;
 		CMDBSource::Query('START TRANSACTION');
 		try {
-			$sTempTable = static::TEMPORARY_TABLE;
+			$sTempTable = $this->GetTempTableName();
 
-			$aQueries = $this->BuildQuerySet($sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $sProgress, $iMaxChunkSize);
+			$aQueries = $this->BuildQuerySetForTemporaryTable($sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $sProgress, $sTempTable, $iMaxChunkSize);
 			foreach ($aQueries['search'] as $sSQL) {
 				ComplexBackgroundTaskLog::Debug($sSQL);
 				CMDBSource::Query($sSQL);
@@ -131,10 +131,27 @@ class DatabaseService
 		return false;
 	}
 
-	public function BuildQuerySet(string $sSearchKey, string $sSqlSearch, array $aSqlApply, string $sKey, string $sProgress, int $iMaxChunkSize): array
+	protected function GetTempTableName()
+	{
+		// avoid collisions
+		$random = random_bytes(16);
+		return static::TEMPORARY_TABLE.bin2hex($random);
+	}
+
+	/**
+	 * @param string $sSearchKey
+	 * @param string $sSqlSearch
+	 * @param array $aSqlApply
+	 * @param string $sKey
+	 * @param string $sProgress
+	 * @param string $sTempTable
+	 * @param int $iMaxChunkSize
+	 *
+	 * @return array
+	 */
+	public function BuildQuerySetForTemporaryTable(string $sSearchKey, string $sSqlSearch, array $aSqlApply, string $sKey, string $sProgress, string $sTempTable, int $iMaxChunkSize): array
 	{
 		$aRequests = [];
-		$sTempTable = static::TEMPORARY_TABLE;
 		$aRequests['search'] = [
 			"DROP TEMPORARY TABLE IF EXISTS `$sTempTable`",
 			"CREATE TEMPORARY TABLE `$sTempTable` ($sSqlSearch AND `$sSearchKey` > $sProgress ORDER BY `$sSearchKey` LIMIT $iMaxChunkSize)",
@@ -143,7 +160,7 @@ class DatabaseService
 		$aDeleteQueries = [];
 		foreach ($aSqlApply as $sTable => $sSqlUpdate) {
 			$sPattern = "/`?$sTable`?/";
-			$sReplacement = "`$sTable` JOIN `$sTempTable` ON `$sTable`.`$sKey` = `$sTempTable`.`$sSearchKey`";
+			$sReplacement = "`$sTable` INNER JOIN `$sTempTable` ON `$sTable`.`$sKey` = `$sTempTable`.`$sSearchKey`";
 			$aDeleteQueries[] = preg_replace($sPattern, $sReplacement, $sSqlUpdate, 1);
 		}
 		$aDeleteQueries[] = "DROP TEMPORARY TABLE IF EXISTS $sTempTable";

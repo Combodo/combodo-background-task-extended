@@ -2,20 +2,25 @@
 
 namespace Combodo\iTop\ComplexBackgroundTask\Service;
 
-use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException;
+use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskHelper;
 use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskLog;
 use ComplexBackgroundTask;
 use DBObjectSet;
 use DBSearch;
 use Exception;
+use MetaModel;
 
 class ComplexBackgroundTaskService
 {
+	const MODULE_SETTING_MAX_EXEC_TIME = 'max_execution_time';
+
 	private $iProcessEndTime;
 
 	public function __construct()
 	{
-		$this->iProcessEndTime = time() + 30;
+		$sMaxExecutionTime = MetaModel::GetModuleSetting(ComplexBackgroundTaskHelper::MODULE_NAME, static::MODULE_SETTING_MAX_EXEC_TIME, 30);
+
+		$this->iProcessEndTime = time() + $sMaxExecutionTime;
 		ComplexBackgroundTaskLog::Enable(APPROOT.'log/error.log');
 	}
 
@@ -145,10 +150,6 @@ class ComplexBackgroundTaskService
 					}
 					ComplexBackgroundTaskLog::Debug("ProcessTask: status: $sStatus, action: $sAction end");
 				}
-			} catch (ComplexBackgroundTaskException $e) {
-				ComplexBackgroundTaskLog::Error('AnonymizerException'.$e->getMessage());
-				// stay in 'running' status
-				$bInProgress = false;
 			} catch (Exception $e) {
 				// stay in 'running' status
 				ComplexBackgroundTaskLog::Error($e->getMessage());

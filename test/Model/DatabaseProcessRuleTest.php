@@ -42,9 +42,9 @@ class DatabaseProcessRuleTest extends ItopDataTestCase
 	}
 
 	/**
-	 * @dataProvider FromOQLProvider
+	 * @dataProvider GetPurgeRuleFromOQLProvider
 	 */
-	public function testFromOQL($sOQL, $sExpSearchQuery, $sExpKey)
+	public function testGetPurgeRuleFromOQL($sOQL, $sExpSearchQuery, $sExpKey)
 	{
 		$oRule = DatabaseProcessRule::GetPurgeRuleFromOQL($sOQL);
 		$this->assertEquals($sExpSearchQuery, $oRule->GetSearchQuery());
@@ -52,7 +52,7 @@ class DatabaseProcessRuleTest extends ItopDataTestCase
 		$this->debug($oRule->GetApplyQueries());
 	}
 
-	public function FromOQLProvider()
+	public function GetPurgeRuleFromOQLProvider()
 	{
 		return [
 			'SELECT Person' => ['SELECT Person', 'SELECT

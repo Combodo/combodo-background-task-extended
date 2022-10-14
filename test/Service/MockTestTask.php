@@ -6,7 +6,7 @@ use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskLog;
  * @copyright   Copyright (C) 2010-2022 Combodo SARL
  * @license     http://opensource.org/licenses/AGPL-3.0
  */
-class CBTTestTask extends ComplexBackgroundTask
+class MockTestTask extends ComplexBackgroundTask
 {
 	private $aActions = [];
 

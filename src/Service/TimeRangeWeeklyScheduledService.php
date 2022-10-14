@@ -15,7 +15,6 @@ class TimeRangeWeeklyScheduledService
 	private $sStartTime;
 	private $sEndTime;
 	private $aDays;
-	private $iAllowedRangeTimeStep;
 
 	/**
 	 * @param int $iCurrentTime
@@ -44,44 +43,65 @@ class TimeRangeWeeklyScheduledService
 
 		if ($iStartTimeToday < $iEndTimeToday) {
 			// Allowed execution time range is staring and ending the same day
+			//         00:00     start     end       00:00
+			// ----------+---------[========]----------+--------
+			//
 			if (!$this->IsAllowedDay($iCurrentTime)) {
-				// Today is not allowed, start newt allowed day
+				// Today is not allowed, start new allowed day
 				$oPlannedStart = $this->GetNextOccurrenceNextDay($iCurrentTime);
 			} else {
-				if ($iCurrentTime >= $iStartTimeToday && $iCurrentTime <= ($iEndTimeToday - $this->iAllowedRangeTimeStep)) {
+				if ($iCurrentTime >= $iStartTimeToday && $iCurrentTime <= $iEndTimeToday) {
 					// Into the current allowed time range
-					$oPlannedStart->modify("+ $this->iAllowedRangeTimeStep seconds");
+					//         00:00     start     end       00:00
+					// ----------+---------[========]----------+--------
+					//                        ^
 				} elseif ($iCurrentTime < $iStartTimeToday) {
 					// Before the allowed time range got to the start
+					//         00:00     start     end       00:00
+					// ----------+---------[========]----------+--------
+					//               ^>>>>>
 					$oPlannedStart->setTimeStamp($iStartTimeToday);
 				} else {
 					// After the allowed time range, got to start next allowed day
+					//        start     end       00:00      start     end       00:00
+					// ---------[========]----------+----------[========]----------+--------
+					//                          ^>>>>>>>>>>>>>>
 					$oPlannedStart = $this->GetNextOccurrenceNextDay($iCurrentTime);
 				}
 			}
 		} else {
 			// Allowed execution time range is around midnight (e.g. the start day is not the same as end day)
-			if ($iCurrentTime <= ($iEndTimeToday - $this->iAllowedRangeTimeStep)) {
+			//       start  00:00   end
+			// --------[======+=====]---------
+			//
+			if ($iCurrentTime <= $iEndTimeToday) {
+				// Before the end of the allowed time range
+				//       start  00:00   end
+				// --------[======+=====]---------
+				//                   ^
+
 				// Check if yesterday was allowed
-				if ($this->IsAllowedDay($iCurrentTime - 86400)) {
-					// Into the current allowed time range (between midnight and end of time range)
-					$oPlannedStart->modify("+ $this->iAllowedRangeTimeStep seconds");
-				} else {
-					// Start another allowed day
+				if (!$this->IsAllowedDay($iCurrentTime - 86400)) {
+					// Start another allowed day. Go back one day to find the next allowed day (may be today)
 					$oPlannedStart = $this->GetNextOccurrenceNextDay($iCurrentTime - 86400);
 				}
 			} else {
 				if ($this->IsAllowedDay($iCurrentTime)) {
 					if ($iCurrentTime < $iStartTimeToday) {
 						// Before the allowed time range go to the start
+						//       start  00:00   end
+						// --------[======+=====]---------
+						//   ^>>>>>
 						$oPlannedStart->setTimeStamp($iStartTimeToday);
 					} else {
 						// Into the current allowed time range (between start of time range and midnight)
-						$oPlannedStart->modify("+ $this->iAllowedRangeTimeStep seconds");
+						//       start  00:00   end
+						// --------[======+=====]---------
+						//           ^
 					}
 				} else {
 					// Start another allowed day
-					$oPlannedStart = $this->GetNextOccurrenceNextDay($iCurrentTime - 86400);
+					$oPlannedStart = $this->GetNextOccurrenceNextDay($iCurrentTime);
 				}
 			}
 		}
@@ -186,14 +206,4 @@ class TimeRangeWeeklyScheduledService
 	{
 		$this->aDays = $aDays;
 	}
-
-	/**
-	 * @param int $iAllowedRangeTimeStep
-	 */
-	public function SetAllowedRangeTimeStep(int $iAllowedRangeTimeStep)
-	{
-		$this->iAllowedRangeTimeStep = $iAllowedRangeTimeStep;
-	}
-
-
 }

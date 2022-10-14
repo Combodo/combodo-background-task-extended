@@ -5,13 +5,17 @@
  */
 
 
+use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskHelper;
 use Combodo\iTop\ComplexBackgroundTask\Service\TimeRangeWeeklyScheduledService;
 
 abstract class AbstractTimeRangeWeeklyScheduledProcess extends AbstractWeeklyScheduledProcess
 {
 	const MODULE_SETTING_MAX_TIME = 'end_time';
-	const MODULE_SETTING_TIME_LIMIT = 'execution_time_limit';
-	const MODULE_SETTING_EXECUTION_STEP = 'execution_step';
+
+	protected function GetModuleName()
+	{
+		return ComplexBackgroundTaskHelper::MODULE_NAME;
+	}
 
 	/**
 	 * Allowed time range start hour
@@ -19,7 +23,8 @@ abstract class AbstractTimeRangeWeeklyScheduledProcess extends AbstractWeeklySch
 	 * @return string
 	 */
 	protected function GetDefaultModuleSettingTime(){
-		return '01:00';
+		return MetaModel::GetConfig()->GetModuleSetting($this->GetModuleName(), static::MODULE_SETTING_TIME, $this->GetDefaultModuleSettingTime());
+
 	}
 
 	/**
@@ -28,25 +33,7 @@ abstract class AbstractTimeRangeWeeklyScheduledProcess extends AbstractWeeklySch
 	 * @return string
 	 */
 	protected function GetDefaultModuleSettingEndTime(){
-		return '05:00';
-	}
-
-	/**
-	 * Execution time limit in seconds (each step during allowed time range)
-	 *
-	 * @return int
-	 */
-	protected function GetDefaultModuleSettingTimeLimit(){
-		return 30;
-	}
-
-	/**
-	 * Scheduling time step (between 2 steps during allowed time range)
-	 *
-	 * @return int
-	 */
-	protected function GetDefaultModuleSettingTimeStep(){
-		return 10;
+		return MetaModel::GetModuleSetting($this->GetModuleName(), static::MODULE_SETTING_MAX_TIME, $this->GetDefaultModuleSettingEndTime());
 	}
 
 	/**
@@ -56,9 +43,9 @@ abstract class AbstractTimeRangeWeeklyScheduledProcess extends AbstractWeeklySch
 	 */
 	public function GetNextOccurrence($sCurrentTime = 'now')
 	{
-		$oAnonymizerService = $this->GetWeeklyScheduledService();
+		$oService = $this->GetWeeklyScheduledService();
 		$iCurrentTime = (new DateTime($sCurrentTime))->getTimestamp();
-		return $oAnonymizerService->GetNextOccurrence($iCurrentTime);
+		return $oService->GetNextOccurrence($iCurrentTime);
 	}
 
 	/**
@@ -67,19 +54,17 @@ abstract class AbstractTimeRangeWeeklyScheduledProcess extends AbstractWeeklySch
 	 */
 	public function GetWeeklyScheduledService(): TimeRangeWeeklyScheduledService
 	{
-		$oAnonymizerService = new TimeRangeWeeklyScheduledService();
+		$Service = new TimeRangeWeeklyScheduledService();
 		$bEnabled = MetaModel::GetConfig()->GetModuleSetting($this->GetModuleName(), static::MODULE_SETTING_ENABLED, static::DEFAULT_MODULE_SETTING_ENABLED);
 		$sStartTime = MetaModel::GetConfig()->GetModuleSetting($this->GetModuleName(), static::MODULE_SETTING_TIME, $this->GetDefaultModuleSettingTime());
 		$sEndTime = MetaModel::GetModuleSetting($this->GetModuleName(), static::MODULE_SETTING_MAX_TIME, $this->GetDefaultModuleSettingEndTime());
-		$iTimeStep = MetaModel::GetModuleSetting($this->GetModuleName(), static::MODULE_SETTING_EXECUTION_STEP, $this->GetDefaultModuleSettingTimeStep());
 
-		$oAnonymizerService->SetEnabled($bEnabled);
-		$oAnonymizerService->SetStartTime($sStartTime);
-		$oAnonymizerService->SetEndTime($sEndTime);
-		$oAnonymizerService->SetAllowedRangeTimeStep($iTimeStep);
-		$oAnonymizerService->SetDays($this->InterpretWeekDays());
+		$Service->SetEnabled($bEnabled);
+		$Service->SetStartTime($sStartTime);
+		$Service->SetEndTime($sEndTime);
+		$Service->SetDays($this->InterpretWeekDays());
 
-		return $oAnonymizerService;
+		return $Service;
 	}
 
 }

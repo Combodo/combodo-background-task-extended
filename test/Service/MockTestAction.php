@@ -6,9 +6,7 @@ use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskLog;
  * @copyright   Copyright (C) 2010-2022 Combodo SARL
  * @license     http://opensource.org/licenses/AGPL-3.0
  */
-
-
-class CBTTestAction extends ComplexBackgroundTaskAction
+class MockTestAction extends ComplexBackgroundTaskAction
 {
 	private $aParams;
 	private $oTask;
@@ -85,10 +83,10 @@ class CBTTestAction extends ComplexBackgroundTaskAction
 			$this->oTask->Set('action_params', $sValue);
 		}
 		if (isset($this->aParams['ExecReturn'])) {
-			if ($this->aParams['ExecReturn'] === 'Exception') {
-				throw new Exception('Test Exception');
+			if ($this->aParams['ExecReturn'] === true || $this->aParams['ExecReturn'] === false) {
+				return $this->aParams['ExecReturn'];
 			}
-			return $this->aParams['ExecReturn'];
+			throw new $this->aParams['ExecReturn']('Test Exception');
 		}
 
 		return true;
