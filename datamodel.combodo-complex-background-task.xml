@@ -211,7 +211,7 @@
 			<parent>cmdbAbstractObject</parent>
 			<properties>
 				<category>bizmodel,searchable</category>
-				<abstract>false</abstract>
+				<abstract>true</abstract>
 				<db_table>database_process_rule</db_table>
 				<naming>
 					<attributes>

@@ -10,6 +10,7 @@ use CMDBSource;
 use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException;
 use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskLog;
 use DatabaseProcessRule;
+use DBSearch;
 use Exception;
 use MetaModel;
 use MySQLHasGoneAwayException;
@@ -41,49 +42,80 @@ class DatabaseService
 	{
 		$aParams = $this->GetParamsForPurgeProcess($oDBProcessRule);
 
-		$sSearchKey = $aParams['search_key'];
-		$sSqlSearch = $aParams['search_query'];
-		$aSqlApply = $aParams['delete_queries'];
-		$sKey = $aParams['key'];
-
-		return $this->ExecuteSQLQueriesByChunk($sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $sProgress, $iMaxChunkSize);
+		return $this->ExecuteQueriesByChunk($aParams, $sProgress, $iMaxChunkSize);
 	}
 
 	/**
 	 * @param \DatabaseProcessRule $oDBProcessRule
 	 *
-	 * @return array
+	 * @return array|null
 	 * @throws \CoreException
 	 */
-	private function GetParamsForPurgeProcess(DatabaseProcessRule $oDBProcessRule): array
+	public function GetParamsForPurgeProcess(DatabaseProcessRule $oDBProcessRule)
 	{
-		$oFilter = $oDBProcessRule->GetFilter();
-		$aCountAttToLoad = [];
-		$sMainClass = null;
-		$sMainClassAlias = null;
-		foreach ($oFilter->GetSelectedClasses() as $sClassAlias => $sClass) {
-			$aCountAttToLoad[$sClassAlias] = [];
-			if (empty($sMainClass)) {
-				$sMainClassAlias = $sClassAlias;
-				$sMainClass = $sClass;
-			}
+		if ($oDBProcessRule->Get('status') == 'inactive') {
+			return null;
 		}
-		$sSearchQuery = $oFilter->MakeSelectQuery([], [], $aCountAttToLoad);
+		$oFilter = $oDBProcessRule->GetFilter();
+		$sMainClass = $oFilter->GetClass();
+		$sMainClassAlias = $oFilter->GetClassAlias();
 
 		$aDeleteQueries = [];
-		foreach (MetaModel::EnumParentClasses($sClass, ENUM_PARENT_CLASSES_ALL) as $sParentClass) {
+		foreach (MetaModel::EnumParentClasses($sMainClass, ENUM_PARENT_CLASSES_ALL) as $sParentClass) {
 			$sParentTable = MetaModel::DBGetTable($sParentClass);
-			$aDeleteQueries[$sParentTable] = "DELETE FROM `$sParentTable`";
+			$aDeleteQueries[$sParentTable] = "DELETE `$sParentTable` FROM `$sParentTable` /*JOIN*/";
 		}
-		$sKey = MetaModel::DBGetKey($sClass);
+		$sKey = MetaModel::DBGetKey($sMainClass);
 
 		return [
-			'name' => $sClass,
+			'name' => $sMainClass,
 			'search_key' => $sMainClassAlias.$sKey,
 			'key' => $sKey,
-			'search_query' => $sSearchQuery,
-			'delete_queries' => $aDeleteQueries,
+			'search_oql' => $oFilter->ToOQL(true),
+			'apply_queries' => $aDeleteQueries,
 		];
+	}
+
+	/**
+	 * @param array $aRule
+	 * @param string $sProgress
+	 * @param int $iMaxChunkSize
+	 *
+	 * @return bool
+	 * @throws \Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException
+	 * @throws \ConfigException
+	 * @throws \CoreException
+	 * @throws \MissingQueryArgument
+	 * @throws \MySQLException
+	 * @throws \MySQLHasGoneAwayException
+	 * @throws \OQLException
+	 */
+	public function ExecuteQueriesByChunk(array $aRule, string &$sProgress, int $iMaxChunkSize): bool
+	{
+		$sSearchKey = $aRule['search_key'] ?? null;
+		$sSqlSearch = $aRule['search_query'] ?? null;
+		$sOqlSearch = $aRule['search_oql'] ?? null;
+		$aSqlApply = $aRule['apply_queries'] ?? null;
+		$sKey = $aRule['key'] ?? null;
+
+		if (is_null($sSearchKey) || !is_array($aSqlApply) || is_null($sKey) || (is_null($sSqlSearch) && is_null($sOqlSearch))) {
+			throw new ComplexBackgroundTaskException("Bad parameters: ".var_export($aRule, true));
+		}
+
+		if (!is_null($sOqlSearch)) {
+			$oFilter = DBSearch::FromOQL($sOqlSearch);
+			$oFilter->AddCondition('id', $sProgress, '>');
+
+			$aCountAttToLoad = [];
+			foreach ($oFilter->GetSelectedClasses() as $sClassAlias => $sClass) {
+				$aCountAttToLoad[$sClassAlias] = [];
+			}
+			$sSqlSearch = $oFilter->MakeSelectQuery([], [], $aCountAttToLoad)." ORDER BY `$sSearchKey`";
+		} else {
+			$sSqlSearch = "$sSqlSearch AND `$sSearchKey` > $sProgress ORDER BY `$sSearchKey`";
+		}
+
+		return $this->ExecuteSQLQueriesByChunkWithTempTable($sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $sProgress, $iMaxChunkSize);
 	}
 
 	/**
@@ -105,13 +137,14 @@ class DatabaseService
 	 * @throws \MySQLException
 	 * @throws \MySQLHasGoneAwayException
 	 */
-	public function ExecuteSQLQueriesByChunk(string $sSearchKey, string $sSqlSearch, array $aSqlApply, string $sKey, string &$sProgress, int $iMaxChunkSize): bool
+	private function ExecuteSQLQueriesByChunk(string $sSearchKey, string $sSqlSearch, array $aSqlApply, string $sKey, string &$sProgress, int $iMaxChunkSize): bool
 	{
+		$sSqlSearch = "$sSqlSearch AND `$sSearchKey` > $sProgress ORDER BY `$sSearchKey`";
 		if ($this->bUseTemporaryTable) {
 			return $this->ExecuteSQLQueriesByChunkWithTempTable($sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $sProgress, $iMaxChunkSize);
 		}
 
-		return $this->ExecuteSQLQueriesByChunkWithIn($sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $sProgress, $iMaxChunkSize);
+		return $this->ExecuteSQLQueriesByChunkWithIn($sSqlSearch, $aSqlApply, $sKey, $sProgress, $iMaxChunkSize);
 	}
 
 	/**
@@ -140,7 +173,7 @@ class DatabaseService
 		try {
 			$sTempTable = $this->GetTempTableName();
 
-			$aQueries = $this->BuildQuerySetForTemporaryTable($sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $sProgress, $sTempTable, $iMaxChunkSize);
+			$aQueries = $this->BuildQuerySetForTemporaryTable($sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $sTempTable, $iMaxChunkSize);
 			foreach ($aQueries['search'] as $sSQL) {
 				ComplexBackgroundTaskLog::Debug($sSQL);
 				CMDBSource::Query($sSQL);
@@ -157,6 +190,7 @@ class DatabaseService
 					CMDBSource::Query($sSQL);
 				}
 			}
+			CMDBSource::Query($aQueries['cleanup']);
 			CMDBSource::Query('COMMIT');
 			// Save progression
 			$sProgress = $sId;
@@ -197,6 +231,7 @@ class DatabaseService
 	{
 		// avoid collisions
 		$random = random_bytes(16);
+
 		return static::TEMPORARY_TABLE.bin2hex($random);
 	}
 
@@ -205,28 +240,34 @@ class DatabaseService
 	 * @param string $sSqlSearch
 	 * @param array $aSqlApply
 	 * @param string $sKey
-	 * @param string $sProgress
 	 * @param string $sTempTable
 	 * @param int $iMaxChunkSize
 	 *
 	 * @return array
+	 * @throws \Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException
 	 */
-	public function BuildQuerySetForTemporaryTable(string $sSearchKey, string $sSqlSearch, array $aSqlApply, string $sKey, string $sProgress, string $sTempTable, int $iMaxChunkSize): array
+	public function BuildQuerySetForTemporaryTable(string $sSearchKey, string $sSqlSearch, array $aSqlApply, string $sKey, string $sTempTable, int $iMaxChunkSize): array
 	{
 		$aRequests = [];
 		$aRequests['search'] = [
 			"DROP TEMPORARY TABLE IF EXISTS `$sTempTable`",
-			"CREATE TEMPORARY TABLE `$sTempTable` ($sSqlSearch AND `$sSearchKey` > $sProgress ORDER BY `$sSearchKey` LIMIT $iMaxChunkSize)",
+			"CREATE TEMPORARY TABLE `$sTempTable` ($sSqlSearch LIMIT $iMaxChunkSize)",
 		];
 
 		$aDeleteQueries = [];
 		foreach ($aSqlApply as $sTable => $sSqlUpdate) {
-			$sPattern = "/`?$sTable`?/";
-			$sReplacement = "`$sTable` INNER JOIN `$sTempTable` ON `$sTable`.`$sKey` = `$sTempTable`.`$sSearchKey`";
-			$aDeleteQueries[] = preg_replace($sPattern, $sReplacement, $sSqlUpdate, 1);
+			$sPattern = "@/\*JOIN\*/@";
+			$sReplacement = "INNER JOIN `$sTempTable` ON `$sTable`.`$sKey` = `$sTempTable`.`$sSearchKey`";
+			$iCount = 0;
+			$sQuery = preg_replace($sPattern, $sReplacement, $sSqlUpdate, 1, $iCount);
+			if ($iCount == 1) {
+				$aDeleteQueries[] = $sQuery;
+			} else {
+				throw new ComplexBackgroundTaskException("DANGER: request $sSqlUpdate is missing /*JOIN*/ for filtering");
+			}
 		}
-		$aDeleteQueries[] = "DROP TEMPORARY TABLE IF EXISTS $sTempTable";
 		$aRequests['delete'] = $aDeleteQueries;
+		$aRequests['cleanup'] = "DROP TEMPORARY TABLE IF EXISTS $sTempTable";
 
 		return $aRequests;
 	}
@@ -250,10 +291,10 @@ class DatabaseService
 	 * @throws \MySQLException
 	 * @throws \MySQLHasGoneAwayException
 	 */
-	private function ExecuteSQLQueriesByChunkWithIn(string $sSearchKey, string $sSqlSearch, array $aSqlApply, string $sKey, string &$sProgress, int $iMaxChunkSize): bool
+	private function ExecuteSQLQueriesByChunkWithIn(string $sSqlSearch, array $aSqlApply, string $sKey, string &$sProgress, int $iMaxChunkSize): bool
 	{
 		$sId = $sProgress;
-		$sSQL = $sSqlSearch." AND $sSearchKey > $sProgress ORDER BY $sSearchKey LIMIT ".$iMaxChunkSize;
+		$sSQL = $sSqlSearch." LIMIT ".$iMaxChunkSize;
 		ComplexBackgroundTaskLog::Debug($sSQL);
 		$oResult = CMDBSource::Query($sSQL);
 

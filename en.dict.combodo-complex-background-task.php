@@ -9,7 +9,7 @@
 Dict::Add('EN US', 'English', 'English', array(
 	// Class DatabaseProcessRule
 	'Class:DatabaseProcessRule/Name' => '%1$s',
-	'Class:DatabaseProcessRule' => 'Archiving rule',
+	'Class:DatabaseProcessRule' => 'Database process rule',
 	'Class:DatabaseProcessRule+' => '',
 	'Class:DatabaseProcessRule/Attribute:name' => 'Name',
 	'Class:DatabaseProcessRule/Attribute:name+' => '',
