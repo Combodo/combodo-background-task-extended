@@ -9,7 +9,9 @@ namespace Combodo\iTop\ComplexBackgroundTask\Service;
 use CMDBSource;
 use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException;
 use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskLog;
+use DatabaseProcessRule;
 use Exception;
+use MetaModel;
 use MySQLHasGoneAwayException;
 
 class DatabaseService
@@ -22,6 +24,66 @@ class DatabaseService
 	{
 		ComplexBackgroundTaskLog::Enable(APPROOT.'log/error.log');
 		$this->bUseTemporaryTable = true;
+	}
+
+	/**
+	 * @param \DatabaseProcessRule $oDBProcessRule
+	 * @param string $sProgress
+	 * @param int $iMaxChunkSize
+	 *
+	 * @return bool
+	 * @throws \Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException
+	 * @throws \CoreException
+	 * @throws \MySQLException
+	 * @throws \MySQLHasGoneAwayException
+	 */
+	public function ExecuteRuleByChunk(DatabaseProcessRule $oDBProcessRule, string &$sProgress, int $iMaxChunkSize): bool
+	{
+		$aParams = $this->GetParamsForPurgeProcess($oDBProcessRule);
+
+		$sSearchKey = $aParams['search_key'];
+		$sSqlSearch = $aParams['search_query'];
+		$aSqlApply = $aParams['delete_queries'];
+		$sKey = $aParams['key'];
+
+		return $this->ExecuteSQLQueriesByChunk($sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $sProgress, $iMaxChunkSize);
+	}
+
+	/**
+	 * @param \DatabaseProcessRule $oDBProcessRule
+	 *
+	 * @return array
+	 * @throws \CoreException
+	 */
+	private function GetParamsForPurgeProcess(DatabaseProcessRule $oDBProcessRule): array
+	{
+		$oFilter = $oDBProcessRule->GetFilter();
+		$aCountAttToLoad = [];
+		$sMainClass = null;
+		$sMainClassAlias = null;
+		foreach ($oFilter->GetSelectedClasses() as $sClassAlias => $sClass) {
+			$aCountAttToLoad[$sClassAlias] = [];
+			if (empty($sMainClass)) {
+				$sMainClassAlias = $sClassAlias;
+				$sMainClass = $sClass;
+			}
+		}
+		$sSearchQuery = $oFilter->MakeSelectQuery([], [], $aCountAttToLoad);
+
+		$aDeleteQueries = [];
+		foreach (MetaModel::EnumParentClasses($sClass, ENUM_PARENT_CLASSES_ALL) as $sParentClass) {
+			$sParentTable = MetaModel::DBGetTable($sParentClass);
+			$aDeleteQueries[$sParentTable] = "DELETE FROM `$sParentTable`";
+		}
+		$sKey = MetaModel::DBGetKey($sClass);
+
+		return [
+			'name' => $sClass,
+			'search_key' => $sMainClassAlias.$sKey,
+			'key' => $sKey,
+			'search_query' => $sSearchQuery,
+			'delete_queries' => $aDeleteQueries,
+		];
 	}
 
 	/**
@@ -131,7 +193,7 @@ class DatabaseService
 		return false;
 	}
 
-	protected function GetTempTableName()
+	private function GetTempTableName()
 	{
 		// avoid collisions
 		$random = random_bytes(16);
@@ -262,7 +324,7 @@ class DatabaseService
 	 * @throws \MySQLException
 	 * @throws \MySQLHasGoneAwayException
 	 */
-	public function GetSelectedKeys(string $sSqlSearch, string $sKey, string &$sProgress, int $iMaxChunkSize): array
+	public function GetSelectedKeys(string $sSqlSearch, string $sKey, string $sProgress, int $iMaxChunkSize): array
 	{
 		$sSQL = $sSqlSearch." AND $sKey > $sProgress ORDER BY $sKey LIMIT ".$iMaxChunkSize;
 		ComplexBackgroundTaskLog::Debug($sSQL);
@@ -271,8 +333,7 @@ class DatabaseService
 		$aObjects = [];
 		if ($oResult->num_rows > 0) {
 			while ($oRaw = $oResult->fetch_assoc()) {
-				$sProgress = $oRaw[$sKey];
-				$aObjects[] = $sProgress;
+				$aObjects[] = $oRaw[$sKey];;
 			}
 		}
 

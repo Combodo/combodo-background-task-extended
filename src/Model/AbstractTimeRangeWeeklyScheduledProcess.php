@@ -23,8 +23,7 @@ abstract class AbstractTimeRangeWeeklyScheduledProcess extends AbstractWeeklySch
 	 * @return string
 	 */
 	protected function GetDefaultModuleSettingTime(){
-		return MetaModel::GetConfig()->GetModuleSetting($this->GetModuleName(), static::MODULE_SETTING_TIME, $this->GetDefaultModuleSettingTime());
-
+		return MetaModel::GetConfig()->GetModuleSetting($this->GetModuleName(), static::MODULE_SETTING_TIME, '01:30');
 	}
 
 	/**
@@ -33,13 +32,15 @@ abstract class AbstractTimeRangeWeeklyScheduledProcess extends AbstractWeeklySch
 	 * @return string
 	 */
 	protected function GetDefaultModuleSettingEndTime(){
-		return MetaModel::GetModuleSetting($this->GetModuleName(), static::MODULE_SETTING_MAX_TIME, $this->GetDefaultModuleSettingEndTime());
+		return MetaModel::GetModuleSetting($this->GetModuleName(), static::MODULE_SETTING_MAX_TIME, '05:00');
 	}
 
 	/**
+	 * @param string $sCurrentTime date formatted
+	 *
+	 * @return \DateTime
 	 * @throws \Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException
 	 * @throws \ProcessInvalidConfigException
-	 * @throws \Exception
 	 */
 	public function GetNextOccurrence($sCurrentTime = 'now')
 	{

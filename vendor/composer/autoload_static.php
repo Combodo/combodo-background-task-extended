@@ -24,7 +24,6 @@ class ComposerStaticInit618e8d9b0dbca93a1c8a882432ef24bd
         'Combodo\\iTop\\ComplexBackgroundTask\\Helper\\ComplexBackgroundTaskException' => __DIR__ . '/../..' . '/src/Helper/ComplexBackgroundTaskException.php',
         'Combodo\\iTop\\ComplexBackgroundTask\\Helper\\ComplexBackgroundTaskHelper' => __DIR__ . '/../..' . '/src/Helper/ComplexBackgroundTaskHelper.php',
         'Combodo\\iTop\\ComplexBackgroundTask\\Helper\\ComplexBackgroundTaskLog' => __DIR__ . '/../..' . '/src/Helper/ComplexBackgroundTaskLog.php',
-        'Combodo\\iTop\\ComplexBackgroundTask\\Model\\DatabaseProcessRule' => __DIR__ . '/../..' . '/src/Model/DatabaseProcessRule.php',
         'Combodo\\iTop\\ComplexBackgroundTask\\Service\\ComplexBackgroundTaskService' => __DIR__ . '/../..' . '/src/Service/ComplexBackgroundTaskService.php',
         'Combodo\\iTop\\ComplexBackgroundTask\\Service\\DatabaseService' => __DIR__ . '/../..' . '/src/Service/DatabaseService.php',
         'Combodo\\iTop\\ComplexBackgroundTask\\Service\\TimeRangeWeeklyScheduledService' => __DIR__ . '/../..' . '/src/Service/TimeRangeWeeklyScheduledService.php',
