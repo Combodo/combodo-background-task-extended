@@ -19,12 +19,9 @@ class DatabaseService
 {
 	const TEMPORARY_TABLE = 'priv_temporary_ids_';
 
-	private $bUseTemporaryTable;
-
 	public function __construct()
 	{
 		ComplexBackgroundTaskLog::Enable(APPROOT.'log/error.log');
-		$this->bUseTemporaryTable = true;
 	}
 
 	/**
@@ -136,35 +133,6 @@ class DatabaseService
 	 * @throws \MySQLException
 	 * @throws \MySQLHasGoneAwayException
 	 */
-	private function ExecuteSQLQueriesByChunk(string $sSearchKey, string $sSqlSearch, array $aSqlApply, string $sKey, string &$sProgress, int $iMaxChunkSize): bool
-	{
-		$sSqlSearch = "$sSqlSearch AND `$sSearchKey` > $sProgress ORDER BY `$sSearchKey`";
-		if ($this->bUseTemporaryTable) {
-			return $this->ExecuteSQLQueriesByChunkWithTempTable($sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $sProgress, $iMaxChunkSize);
-		}
-
-		return $this->ExecuteSQLQueriesByChunkWithIn($sSqlSearch, $aSqlApply, $sKey, $sProgress, $iMaxChunkSize);
-	}
-
-	/**
-	 * Search objects to update/delete and execute update/delete of max_chunk_size elements.
-	 * Manage a progress value to keep track of the progression (keep the current value of the key).
-	 * This method needs to be called repeatedly until it returns true.
-	 *
-	 * @param string $sSearchKey Key alias returned by the search query
-	 * @param string $sSqlSearch SQL request to find the rows to compute (should return a list of keys)
-	 * @param array $aSqlApply array to update/delete elements found by $sSqlSearch, don't specify the where close
-	 * @param string $sKey primary key of updated table
-	 * @param string $sProgress start the search after this value => updated with the last id computed
-	 * @param int $iMaxChunkSize limit the size of processed data
-	 *
-	 * @return bool true if all objects where computed, false if other objects need to be computed later
-	 *
-	 * @throws \Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException
-	 * @throws \CoreException
-	 * @throws \MySQLException
-	 * @throws \MySQLHasGoneAwayException
-	 */
 	private function ExecuteSQLQueriesByChunkWithTempTable(string $sSearchKey, string $sSqlSearch, array $aSqlApply, string $sKey, string &$sProgress, int $iMaxChunkSize): bool
 	{
 		$sId = $sProgress;
@@ -253,19 +221,19 @@ class DatabaseService
 			"CREATE TEMPORARY TABLE `$sTempTable` ($sSqlSearch LIMIT $iMaxChunkSize)",
 		];
 
-		$aDeleteQueries = [];
+		$aApplyQueries = [];
 		foreach ($aSqlApply as $sTable => $sSqlUpdate) {
 			$sPattern = "@/\*JOIN\*/@";
 			$sReplacement = "INNER JOIN `$sTempTable` ON `$sTable`.`$sKey` = `$sTempTable`.`$sSearchKey`";
 			$iCount = 0;
 			$sQuery = preg_replace($sPattern, $sReplacement, $sSqlUpdate, 1, $iCount);
 			if ($iCount == 1) {
-				$aDeleteQueries[] = $sQuery;
+				$aApplyQueries[] = $sQuery;
 			} else {
 				throw new ComplexBackgroundTaskException("DANGER: request $sSqlUpdate is missing /*JOIN*/ for filtering");
 			}
 		}
-		$aRequests['delete'] = $aDeleteQueries;
+		$aRequests['delete'] = $aApplyQueries;
 		$aRequests['cleanup'] = "DROP TEMPORARY TABLE IF EXISTS $sTempTable";
 
 		return $aRequests;
@@ -276,7 +244,6 @@ class DatabaseService
 	 * Manage a progress value to keep track of the progression (keep the current value of the key).
 	 * This method needs to be called repeatedly until it returns true.
 	 *
-	 * @param string $sSearchKey Key alias returned by the search query
 	 * @param string $sSqlSearch SQL request to find the rows to compute (should return a list of keys)
 	 * @param array $aSqlApply array to update/delete elements found by $sSqlSearch, don't specify the where close
 	 * @param string $sKey primary key of updated table
@@ -399,13 +366,5 @@ class DatabaseService
 		$aRow = $oResult->fetch_assoc();
 
 		return $aRow['COUNT'];
-	}
-
-	/**
-	 * @param bool $bUseTemporaryTable
-	 */
-	public function SetUseTemporaryTable(bool $bUseTemporaryTable)
-	{
-		$this->bUseTemporaryTable = $bUseTemporaryTable;
 	}
 }
