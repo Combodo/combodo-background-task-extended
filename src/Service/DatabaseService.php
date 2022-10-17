@@ -57,19 +57,20 @@ class DatabaseService
 		$sMainClass = $oFilter->GetClass();
 		$sMainClassAlias = $oFilter->GetClassAlias();
 
-		$aDeleteQueries = [];
-		foreach (MetaModel::EnumParentClasses($sMainClass, ENUM_PARENT_CLASSES_ALL) as $sParentClass) {
-			$sParentTable = MetaModel::DBGetTable($sParentClass);
-			$aDeleteQueries[$sParentTable] = "DELETE `$sParentTable` FROM `$sParentTable` /*JOIN*/";
+		$aApplyQueries = [];
+		$aClasses = array_merge(MetaModel::EnumParentClasses($sMainClass, ENUM_PARENT_CLASSES_ALL), MetaModel::EnumChildClasses($sMainClass));
+		foreach ($aClasses as $sClass) {
+			$sDBTable = MetaModel::DBGetTable($sClass);
+			$aApplyQueries[$sDBTable] = "DELETE `$sDBTable` FROM `$sDBTable` /*JOIN*/";
 		}
 		$sKey = MetaModel::DBGetKey($sMainClass);
-
+		$sSqlSearch = $this->GetSqlFromOQL($oFilter->ToOQL(true));
 		return [
 			'name' => $sMainClass,
 			'search_key' => $sMainClassAlias.$sKey,
 			'key' => $sKey,
-			'search_oql' => $oFilter->ToOQL(true),
-			'apply_queries' => $aDeleteQueries,
+			'search_query' => $sSqlSearch,
+			'apply_queries' => $aApplyQueries,
 		];
 	}
 
@@ -100,13 +101,7 @@ class DatabaseService
 		}
 
 		if (!is_null($sOqlSearch)) {
-			$oFilter = DBSearch::FromOQL($sOqlSearch);
-
-			$aCountAttToLoad = [];
-			foreach ($oFilter->GetSelectedClasses() as $sClassAlias => $sClass) {
-				$aCountAttToLoad[$sClassAlias] = [];
-			}
-			$sSqlSearch = $oFilter->MakeSelectQuery([], [], $aCountAttToLoad);
+			$sSqlSearch = $this->GetSqlFromOQL($sOqlSearch);
 		} else {
 			$sSqlSearch = "$sSqlSearch AND `$sSearchKey` > $sProgress ORDER BY `$sSearchKey`";
 		}
@@ -152,7 +147,7 @@ class DatabaseService
 			$sId = $aRow['MAX'];
 
 			if ($iCount > 0) {
-				foreach ($aQueries['delete'] as $sSQL) {
+				foreach ($aQueries['apply'] as $sSQL) {
 					BackgroundTaskExLog::Debug($sSQL);
 					CMDBSource::Query($sSQL);
 				}
@@ -233,10 +228,31 @@ class DatabaseService
 				throw new BackgroundTaskExException("DANGER: request $sSqlUpdate is missing /*JOIN*/ for filtering");
 			}
 		}
-		$aRequests['delete'] = $aApplyQueries;
+		$aRequests['apply'] = $aApplyQueries;
 		$aRequests['cleanup'] = "DROP TEMPORARY TABLE IF EXISTS $sTempTable";
 
 		return $aRequests;
+	}
+
+	/**
+	 * @param $sOqlSearch
+	 *
+	 * @return string
+	 * @throws \ConfigException
+	 * @throws \CoreException
+	 * @throws \MissingQueryArgument
+	 * @throws \OQLException
+	 */
+	private function GetSqlFromOQL($sOqlSearch): string
+	{
+		$oFilter = DBSearch::FromOQL($sOqlSearch);
+
+		$aAttToLoad = [];
+		foreach ($oFilter->GetSelectedClasses() as $sClassAlias => $sClass) {
+			$aAttToLoad[$sClassAlias] = [];
+		}
+
+		return $oFilter->MakeSelectQuery([], [], $aAttToLoad);
 	}
 
 	/**

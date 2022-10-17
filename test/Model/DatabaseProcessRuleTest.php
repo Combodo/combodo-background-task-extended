@@ -7,8 +7,8 @@
 namespace Combodo\iTop\BackgroundTaskEx\Test\Model;
 
 use Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExLog;
+use Combodo\iTop\BackgroundTaskEx\Service\DatabaseService;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
-use DatabaseProcessRule;
 
 /**
  * @runTestsInSeparateProcesses
@@ -24,6 +24,10 @@ class DatabaseProcessRuleTest extends ItopDataTestCase
 	protected function setUp(): void
 	{
 		parent::setUp();
+
+		require_once 'MockDatabaseProcessRule.php';
+
+		\MockDatabaseProcessRule::Init();
 
 		$this->debug('----- Test '.$this->getName());
 
@@ -44,35 +48,53 @@ class DatabaseProcessRuleTest extends ItopDataTestCase
 	/**
 	 * @dataProvider GetPurgeRuleFromOQLProvider
 	 */
-	public function testGetPurgeRuleFromOQL($sOQL, $sExpSearchQuery, $sExpKey)
+	public function testGetPurgeRuleFromOQL($sTargetClass, $sOQL, $sExpSearchQuery, $sExpSearchKey, $sExpKey)
 	{
-		$oRule = DatabaseProcessRule::GetPurgeRuleFromOQL($sOQL);
-		$this->assertEquals($sExpSearchQuery, $oRule->GetSearchQuery());
-		$this->assertEquals($sExpKey, $oRule->GetKey());
-		$this->debug($oRule->GetApplyQueries());
+		/** @var \MockDatabaseProcessRule $oRule */
+		$oRule = \MetaModel::NewObject('MockDatabaseProcessRule', [
+			'type' => 'advanced',
+			'name' => uniqid('', true),
+			'target_class' => $sTargetClass,
+			'oql_scope' => $sOQL,
+		]);
+		$oService = new DatabaseService();
+		$aParams = $oService->GetParamsForPurgeProcess($oRule);
+		$this->assertEquals($sExpSearchQuery, $aParams['search_query']);
+		$this->assertEquals($sExpKey, $aParams['key']);
+		$this->assertEquals($sExpSearchKey, $aParams['search_key']);
+
+		$aQueries = $oService->BuildQuerySetForTemporaryTable($aParams['search_key'], $aParams['search_query'], $aParams['apply_queries'], $aParams['key'], 'temp', 1000);
+
+		$this->debug($aQueries);
 	}
 
 	public function GetPurgeRuleFromOQLProvider()
 	{
 		return [
-			'SELECT Person' => ['SELECT Person', 'SELECT
+			'SELECT Person' => ['Person', 'SELECT Person', 'SELECT
  DISTINCT `Person`.`id` AS `Personid`
  FROM 
    `person` AS `Person`
  WHERE 1
-  ', 'id'],
-			'SELECT Person AS p' => ['SELECT Person AS p', 'SELECT
+  ', 'Personid', 'id'],
+			'SELECT Contact' => ['Contact', 'SELECT Contact', 'SELECT
+ DISTINCT `Contact`.`id` AS `Contactid`
+ FROM 
+   `contact` AS `Contact`
+ WHERE 1
+  ', 'Contactid', 'id'],
+			'SELECT Person AS p' => ['Person', 'SELECT Person AS p', 'SELECT
  DISTINCT `p`.`id` AS `pid`
  FROM 
    `person` AS `p`
  WHERE 1
-  ', 'id'],
-			'SELECT CMDBChange' => ['SELECT CMDBChange', 'SELECT
+  ', 'pid', 'id'],
+			'SELECT CMDBChange' => ['CMDBChange', 'SELECT CMDBChange', 'SELECT
  DISTINCT `CMDBChange`.`id` AS `CMDBChangeid`
  FROM 
    `priv_change` AS `CMDBChange`
  WHERE 1
-  ', 'id'],
+  ', 'CMDBChangeid', 'id'],
 		];
 	}
 }

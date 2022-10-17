@@ -18,7 +18,7 @@ class MockTestTask extends BackgroundTaskEx
 			'name_attcode' => ['name'],
 			'state_attcode' => '',
 			'reconc_keys' => [],
-			'db_table' => 'priv_complex_background_task_cbt_test',
+			'db_table' => 'priv_complex_background_task_mock',
 			'db_key_field' => 'id',
 			'db_finalclass_field' => 'finalclass',
 		];
