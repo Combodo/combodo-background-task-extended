@@ -165,11 +165,13 @@
 					<comment>
 						/**
 						* Change the specific data to retry the action on error
+						* @return bool true if action can continue
 						*/
 					</comment>
 					<code><![CDATA[
-       public function ChangeActionParamsOnError()
+       public function ChangeActionParamsOnError(): bool
        {
+					return false;
        }
 ]]></code>
 				</method>

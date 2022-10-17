@@ -119,7 +119,11 @@ class ComplexBackgroundTaskService
 							$sStatus = 'finished';
 							$bInProgress = false;
 						} else {
-							$oAction->ChangeActionParamsOnError();
+							$bCanContinue = $oAction->ChangeActionParamsOnError();
+							if (!$bCanContinue) {
+								$sStatus = 'finished';
+								$bInProgress = false;
+							}
 						}
 						break;
 
@@ -132,7 +136,7 @@ class ComplexBackgroundTaskService
 						break;
 				}
 
-				if (!is_null($oAction)) {
+				if ($bInProgress) {
 					$sAction = $oAction->Get('friendlyname');
 					ComplexBackgroundTaskLog::Debug("ProcessTask: status: $sStatus, action: $sAction begin");
 					$sStatus = 'running';

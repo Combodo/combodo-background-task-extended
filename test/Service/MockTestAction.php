@@ -63,13 +63,16 @@ class MockTestAction extends ComplexBackgroundTaskAction
 	/**
 	 * @inheritDoc
 	 */
-	public function ChangeActionParamsOnError()
+	public function ChangeActionParamsOnError(): bool
 	{
 		ComplexBackgroundTaskLog::Info('ChangeActionParamsOnError called');
 		if (isset($this->aParams['Retry'])) {
 			$sValue = $this->oTask->Get('action_params').' - '.$this->aParams['Retry'];
 			$this->oTask->Set('action_params', $sValue);
+			return true;
 		}
+
+		return false;
 	}
 
 	/**
