@@ -131,6 +131,7 @@ class DatabaseService
 	private function ExecuteSQLQueriesByChunkWithTempTable(string $sSearchKey, string $sSqlSearch, array $aSqlApply, string $sKey, string &$sProgress, int $iMaxChunkSize): bool
 	{
 		$sId = $sProgress;
+		BackgroundTaskExLog::Debug('START TRANSACTION');
 		CMDBSource::Query('START TRANSACTION');
 		try {
 			$sTempTable = $this->GetTempTableName();
@@ -146,13 +147,17 @@ class DatabaseService
 			$iCount = $aRow['COUNT'];
 			$sId = $aRow['MAX'];
 
+			BackgroundTaskExLog::Debug("Found $iCount entries up to $sId to process");
+
 			if ($iCount > 0) {
 				foreach ($aQueries['apply'] as $sSQL) {
 					BackgroundTaskExLog::Debug($sSQL);
 					CMDBSource::Query($sSQL);
 				}
 			}
+			BackgroundTaskExLog::Debug($aQueries['cleanup']);
 			CMDBSource::Query($aQueries['cleanup']);
+			BackgroundTaskExLog::Debug('COMMIT');
 			CMDBSource::Query('COMMIT');
 			// Save progression
 			$sProgress = $sId;
@@ -165,6 +170,7 @@ class DatabaseService
 			}
 		} catch (MySQLHasGoneAwayException $e) {
 			// Allow to retry the same set
+			BackgroundTaskExLog::Error('ROLLBACK: '.$e->getMessage());
 			CMDBSource::Query('ROLLBACK');
 			if ($iMaxChunkSize == 1) {
 				// This is hopeless for this entry
@@ -172,11 +178,11 @@ class DatabaseService
 			}
 			throw $e;
 		} catch (Exception $e) {
+			BackgroundTaskExLog::Error('ROLLBACK: '.$e->getMessage());
 			CMDBSource::Query('ROLLBACK');
 			if ($iMaxChunkSize == 1) {
 				// Ignore current entries and skip to the next ones
 				$sProgress = $sId;
-				BackgroundTaskExLog::Error($e->getMessage());
 
 				return false;
 			}
