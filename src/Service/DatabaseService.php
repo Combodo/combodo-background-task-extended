@@ -104,13 +104,12 @@ class DatabaseService
 
 		if (!is_null($sOqlSearch)) {
 			$oFilter = DBSearch::FromOQL($sOqlSearch);
-			$oFilter->AddCondition('id', $sProgress, '>');
 
 			$aCountAttToLoad = [];
 			foreach ($oFilter->GetSelectedClasses() as $sClassAlias => $sClass) {
 				$aCountAttToLoad[$sClassAlias] = [];
 			}
-			$sSqlSearch = $oFilter->MakeSelectQuery([], [], $aCountAttToLoad)." ORDER BY `$sSearchKey`";
+			$sSqlSearch = $oFilter->MakeSelectQuery([], [], $aCountAttToLoad);
 		} else {
 			$sSqlSearch = "$sSqlSearch AND `$sSearchKey` > $sProgress ORDER BY `$sSearchKey`";
 		}
