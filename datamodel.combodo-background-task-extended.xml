@@ -22,7 +22,7 @@
 				</field>
 				<field id="current_action_id" xsi:type="AttributeExternalKey">
 					<sql>current_action_id</sql>
-					<target_class>ComplexBackgroundTaskAction</target_class>
+					<target_class>BackgroundTaskExAction</target_class>
 					<is_null_allowed>true</is_null_allowed>
 					<tracking_level>none</tracking_level>
 					<on_target_delete>DEL_MANUAL</on_target_delete>
@@ -61,7 +61,7 @@
        {
             $sCurrentActionId = $this->Get('current_action_id');
             if ($sCurrentActionId) {
-                return MetaModel::GetObject('ComplexBackgroundTaskAction', $sCurrentActionId);
+                return MetaModel::GetObject('BackgroundTaskExAction', $sCurrentActionId);
             }
             return null;
        }
@@ -78,11 +78,11 @@
             if ($sCurrentActionId) {
                 // Remove current action
                 $this->Set('current_action_id', null);
-                $oAction = MetaModel::GetObject('ComplexBackgroundTaskAction', $sCurrentActionId);
+                $oAction = MetaModel::GetObject('BackgroundTaskExAction', $sCurrentActionId);
                 $oAction->DBDelete();
             }
             $sId = $this->GetKey();
-            $oSet = new DBObjectSet(DBSearch::FromOQL("SELECT ComplexBackgroundTaskAction WHERE task_id=:id"), ['rank' => true], ['id' => $sId]);
+            $oSet = new DBObjectSet(DBSearch::FromOQL("SELECT BackgroundTaskExAction WHERE task_id=:id"), ['rank' => true], ['id' => $sId]);
             $oSet->SetLimit(1);
             $oAction = $oSet->Fetch();
             $oActionId = is_null($oAction) ? null : $oAction->GetKey();

@@ -6,7 +6,7 @@ use Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExLog;
  * @copyright   Copyright (C) 2010-2022 Combodo SARL
  * @license     http://opensource.org/licenses/AGPL-3.0
  */
-class MockTestAction extends ComplexBackgroundTaskAction
+class MockTestAction extends BackgroundTaskExAction
 {
 	private $aParams;
 	private $oTask;

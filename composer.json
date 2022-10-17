@@ -7,9 +7,9 @@
       "Combodo\\iTop\\BackgroundTaskEx\\": "src"
     }
   },
-  "name": "combodo/combodo-complex-background-task",
+  "name": "combodo/combodo-background-task-extended",
   "type": "itop-extension",
-  "description": "Combodo complex background task",
+  "description": "Combodo background task extended",
   "require": {
     "composer-runtime-api": "^2.0"
   }

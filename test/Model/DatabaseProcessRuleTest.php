@@ -7,8 +7,8 @@
 namespace Combodo\iTop\BackgroundTaskEx\Test\Model;
 
 use Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExLog;
-use Combodo\iTop\BackgroundTaskEx\Model\DatabaseProcessRule;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
+use DatabaseProcessRule;
 
 /**
  * @runTestsInSeparateProcesses

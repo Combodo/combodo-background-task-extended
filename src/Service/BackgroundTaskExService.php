@@ -55,6 +55,7 @@ class BackgroundTaskExService
 
 	/**
 	 * @param string $sOQL
+	 * @param string $sMessage
 	 *
 	 * @return bool
 	 * @throws \ArchivedObjectException
@@ -96,7 +97,7 @@ class BackgroundTaskExService
 	protected function ProcessOneTask(BackgroundTaskEx $oTask)
 	{
 		$sStatus = $oTask->Get('status');
-		/** @var \ComplexBackgroundTaskAction $oAction */
+		/** @var \BackgroundTaskExAction $oAction */
 		$oAction = null;
 		$bInProgress = true;
 		while ($bInProgress) {

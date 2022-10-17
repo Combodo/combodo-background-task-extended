@@ -7,8 +7,8 @@
 namespace Combodo\iTop\BackgroundTaskEx\Service;
 
 use CMDBSource;
-use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException;
-use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskLog;
+use Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExException;
+use Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExLog;
 use DatabaseProcessRule;
 use DBSearch;
 use Exception;
@@ -21,7 +21,7 @@ class DatabaseService
 
 	public function __construct()
 	{
-		ComplexBackgroundTaskLog::Enable(APPROOT.'log/error.log');
+		BackgroundTaskExLog::Enable(APPROOT.'log/error.log');
 	}
 
 	/**
@@ -96,7 +96,7 @@ class DatabaseService
 		$sKey = $aRule['key'] ?? null;
 
 		if (is_null($sSearchKey) || !is_array($aSqlApply) || is_null($sKey) || (is_null($sSqlSearch) && is_null($sOqlSearch))) {
-			throw new ComplexBackgroundTaskException("Bad parameters: ".var_export($aRule, true));
+			throw new BackgroundTaskExException("Bad parameters: ".var_export($aRule, true));
 		}
 
 		if (!is_null($sOqlSearch)) {
@@ -142,7 +142,7 @@ class DatabaseService
 
 			$aQueries = $this->BuildQuerySetForTemporaryTable($sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $sTempTable, $iMaxChunkSize);
 			foreach ($aQueries['search'] as $sSQL) {
-				ComplexBackgroundTaskLog::Debug($sSQL);
+				BackgroundTaskExLog::Debug($sSQL);
 				CMDBSource::Query($sSQL);
 			}
 
@@ -153,7 +153,7 @@ class DatabaseService
 
 			if ($iCount > 0) {
 				foreach ($aQueries['delete'] as $sSQL) {
-					ComplexBackgroundTaskLog::Debug($sSQL);
+					BackgroundTaskExLog::Debug($sSQL);
 					CMDBSource::Query($sSQL);
 				}
 			}
@@ -173,7 +173,7 @@ class DatabaseService
 			CMDBSource::Query('ROLLBACK');
 			if ($iMaxChunkSize == 1) {
 				// This is hopeless for this entry
-				throw new ComplexBackgroundTaskException($e->getMessage());
+				throw new BackgroundTaskExException($e->getMessage());
 			}
 			throw $e;
 		} catch (Exception $e) {
@@ -181,7 +181,7 @@ class DatabaseService
 			if ($iMaxChunkSize == 1) {
 				// Ignore current entries and skip to the next ones
 				$sProgress = $sId;
-				ComplexBackgroundTaskLog::Error($e->getMessage());
+				BackgroundTaskExLog::Error($e->getMessage());
 
 				return false;
 			}
@@ -230,7 +230,7 @@ class DatabaseService
 			if ($iCount == 1) {
 				$aApplyQueries[] = $sQuery;
 			} else {
-				throw new ComplexBackgroundTaskException("DANGER: request $sSqlUpdate is missing /*JOIN*/ for filtering");
+				throw new BackgroundTaskExException("DANGER: request $sSqlUpdate is missing /*JOIN*/ for filtering");
 			}
 		}
 		$aRequests['delete'] = $aApplyQueries;
@@ -261,7 +261,7 @@ class DatabaseService
 	{
 		$sId = $sProgress;
 		$sSQL = $sSqlSearch." LIMIT ".$iMaxChunkSize;
-		ComplexBackgroundTaskLog::Debug($sSQL);
+		BackgroundTaskExLog::Debug($sSQL);
 		$oResult = CMDBSource::Query($sSQL);
 
 		$aObjects = [];
@@ -274,7 +274,7 @@ class DatabaseService
 			try {
 				foreach ($aSqlApply as $sSqlUpdate) {
 					$sSQL = $sSqlUpdate." WHERE `$sKey` IN (".implode(', ', $aObjects).');';
-					ComplexBackgroundTaskLog::Debug($sSQL);
+					BackgroundTaskExLog::Debug($sSQL);
 					CMDBSource::Query($sSQL);
 				}
 				CMDBSource::Query('COMMIT');
@@ -285,7 +285,7 @@ class DatabaseService
 				CMDBSource::Query('ROLLBACK');
 				if ($iMaxChunkSize == 1) {
 					// This is hopeless for this entry
-					throw new ComplexBackgroundTaskException($e->getMessage());
+					throw new BackgroundTaskExException($e->getMessage());
 				}
 				throw $e;
 			} catch (Exception $e) {
@@ -293,7 +293,7 @@ class DatabaseService
 				if ($iMaxChunkSize == 1) {
 					// Ignore current entries and skip to the next ones
 					$sProgress = $sId;
-					ComplexBackgroundTaskLog::Error($e->getMessage());
+					BackgroundTaskExLog::Error($e->getMessage());
 
 					return false;
 				}
@@ -334,7 +334,7 @@ class DatabaseService
 	public function GetSelectedKeys(string $sSqlSearch, string $sKey, string $sProgress, int $iMaxChunkSize): array
 	{
 		$sSQL = $sSqlSearch." AND $sKey > $sProgress ORDER BY $sKey LIMIT ".$iMaxChunkSize;
-		ComplexBackgroundTaskLog::Debug($sSQL);
+		BackgroundTaskExLog::Debug($sSQL);
 		$oResult = CMDBSource::Query($sSQL);
 
 		$aObjects = [];
@@ -361,7 +361,7 @@ class DatabaseService
 	public function CountSelectedKeys(string $sSqlSearch)
 	{
 		$sSQL = "SELECT COUNT(*) AS COUNT FROM ($sSqlSearch) AS _chandrila_";
-		ComplexBackgroundTaskLog::Debug($sSQL);
+		BackgroundTaskExLog::Debug($sSQL);
 		$oResult = CMDBSource::Query($sSQL);
 		$aRow = $oResult->fetch_assoc();
 
