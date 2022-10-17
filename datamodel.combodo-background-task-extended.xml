@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <itop_design xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.7">
 	<classes>
-		<class id="ComplexBackgroundTask" _delta="define">
+		<class id="BackgroundTaskEx" _delta="define">
 			<parent>DBObject</parent>
 			<properties>
 				<category/>
 				<abstract>true</abstract>
-				<db_table>priv_complex_background_task</db_table>
+				<db_table>priv_background_task_ex</db_table>
 				<naming>
 					<attributes>
 						<attribute id="name"/>
@@ -106,15 +106,15 @@
 				</list>
 			</presentation>
 		</class>
-		<class id="ComplexBackgroundTaskAction" _delta="define">
+		<class id="BackgroundTaskExAction" _delta="define">
 			<parent>DBObject</parent>
 			<php_parent>
-				<name>AbstractComplexBackgroundTaskAction</name>
+				<name>AbstractBackgroundTaskExAction</name>
 			</php_parent>
 			<properties>
 				<category/>
 				<abstract>true</abstract>
-				<db_table>priv_complex_background_task_action</db_table>
+				<db_table>priv_background_task_ex_action</db_table>
 				<naming>
 					<attributes>
 						<attribute id="name"/>
@@ -136,7 +136,7 @@
 				</field>
 				<field id="task_id" xsi:type="AttributeExternalKey">
 					<sql>task_id</sql>
-					<target_class>ComplexBackgroundTask</target_class>
+					<target_class>BackgroundTaskEx</target_class>
 					<is_null_allowed>true</is_null_allowed>
 					<tracking_level>none</tracking_level>
 					<on_target_delete>DEL_AUTO</on_target_delete>

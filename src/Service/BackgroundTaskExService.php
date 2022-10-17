@@ -1,16 +1,16 @@
 <?php
 
-namespace Combodo\iTop\ComplexBackgroundTask\Service;
+namespace Combodo\iTop\BackgroundTaskEx\Service;
 
-use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskHelper;
-use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskLog;
-use ComplexBackgroundTask;
+use BackgroundTaskEx;
+use Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExHelper;
+use Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExLog;
 use DBObjectSet;
 use DBSearch;
 use Exception;
 use MetaModel;
 
-class ComplexBackgroundTaskService
+class BackgroundTaskExService
 {
 	const MODULE_SETTING_MAX_EXEC_TIME = 'max_execution_time';
 
@@ -18,10 +18,10 @@ class ComplexBackgroundTaskService
 
 	public function __construct()
 	{
-		$sMaxExecutionTime = MetaModel::GetModuleSetting(ComplexBackgroundTaskHelper::MODULE_NAME, static::MODULE_SETTING_MAX_EXEC_TIME, 30);
+		$sMaxExecutionTime = MetaModel::GetModuleSetting(BackgroundTaskExHelper::MODULE_NAME, static::MODULE_SETTING_MAX_EXEC_TIME, 30);
 
 		$this->iProcessEndTime = time() + $sMaxExecutionTime;
-		ComplexBackgroundTaskLog::Enable(APPROOT.'log/error.log');
+		BackgroundTaskExLog::Enable(APPROOT.'log/error.log');
 	}
 
 	/**
@@ -70,7 +70,7 @@ class ComplexBackgroundTaskService
 	{
 		$oSearch = DBSearch::FromOQL($sOQL);
 		$oSet = new DBObjectSet($oSearch);
-		/** @var ComplexBackgroundTask $oTask */
+		/** @var BackgroundTaskEx $oTask */
 		while ($oTask = $oSet->Fetch()) {
 			if ($this->IsTimeoutReached()) {
 				return false;
@@ -87,13 +87,13 @@ class ComplexBackgroundTaskService
 	}
 
 	/**
-	 * @param \ComplexBackgroundTask $oTask (ResilientBackgroundTask)
+	 * @param \BackgroundTaskEx $oTask (ResilientBackgroundTask)
 	 *
 	 * @return bool
 	 * @throws \ArchivedObjectException
 	 * @throws \CoreException
 	 */
-	protected function ProcessOneTask(ComplexBackgroundTask $oTask)
+	protected function ProcessOneTask(BackgroundTaskEx $oTask)
 	{
 		$sStatus = $oTask->Get('status');
 		/** @var \ComplexBackgroundTaskAction $oAction */
@@ -138,7 +138,7 @@ class ComplexBackgroundTaskService
 
 				if ($bInProgress) {
 					$sAction = $oAction->Get('friendlyname');
-					ComplexBackgroundTaskLog::Debug("ProcessTask: status: $sStatus, action: $sAction begin");
+					BackgroundTaskExLog::Debug("ProcessTask: status: $sStatus, action: $sAction begin");
 					$sStatus = 'running';
 					$oTask->Set('status', $sStatus);
 					$oTask->DBWrite();
@@ -152,11 +152,11 @@ class ComplexBackgroundTaskService
 						$oTask->DBWrite();
 						$bInProgress = false;
 					}
-					ComplexBackgroundTaskLog::Debug("ProcessTask: status: $sStatus, action: $sAction end");
+					BackgroundTaskExLog::Debug("ProcessTask: status: $sStatus, action: $sAction end");
 				}
 			} catch (Exception $e) {
 				// stay in 'running' status
-				ComplexBackgroundTaskLog::Error($e->getMessage());
+				BackgroundTaskExLog::Error($e->getMessage());
 				$bInProgress = false;
 			}
 		}

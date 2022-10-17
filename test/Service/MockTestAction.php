@@ -1,6 +1,6 @@
 <?php
 
-use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskLog;
+use Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExLog;
 
 /**
  * @copyright   Copyright (C) 2010-2022 Combodo SARL
@@ -53,7 +53,7 @@ class MockTestAction extends ComplexBackgroundTaskAction
 	 */
 	public function InitActionParams()
 	{
-		ComplexBackgroundTaskLog::Info('InitActionParams called');
+		BackgroundTaskExLog::Info('InitActionParams called');
 		if (isset($this->aParams['Init'])) {
 			$sValue = $this->oTask->Get('action_params').' - '.$this->aParams['Init'];
 			$this->oTask->Set('action_params', $sValue);
@@ -65,7 +65,7 @@ class MockTestAction extends ComplexBackgroundTaskAction
 	 */
 	public function ChangeActionParamsOnError(): bool
 	{
-		ComplexBackgroundTaskLog::Info('ChangeActionParamsOnError called');
+		BackgroundTaskExLog::Info('ChangeActionParamsOnError called');
 		if (isset($this->aParams['Retry'])) {
 			$sValue = $this->oTask->Get('action_params').' - '.$this->aParams['Retry'];
 			$this->oTask->Set('action_params', $sValue);
@@ -80,7 +80,7 @@ class MockTestAction extends ComplexBackgroundTaskAction
 	 */
 	public function ExecuteAction($iEndExecutionTime): bool
 	{
-		ComplexBackgroundTaskLog::Info('ExecuteAction called');
+		BackgroundTaskExLog::Info('ExecuteAction called');
 		if (isset($this->aParams['Execute'])) {
 			$sValue = $this->oTask->Get('action_params').' - '.$this->aParams['Execute'];
 			$this->oTask->Set('action_params', $sValue);

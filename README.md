@@ -1,4 +1,4 @@
-# Extension Combodo complex background task
+# Extension Combodo background task extended
 
 Background tasks with list of actions to execute.
 Can split the execution in chunks if too long.

@@ -4,10 +4,10 @@
  * @license     http://opensource.org/licenses/AGPL-3.0
  */
 
-namespace Combodo\iTop\ComplexBackgroundTask\Test\Service;
+namespace Combodo\iTop\BackgroundTaskEx\Test\Service;
 
-use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskLog;
-use Combodo\iTop\ComplexBackgroundTask\Service\TimeRangeWeeklyScheduledService;
+use Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExLog;
+use Combodo\iTop\BackgroundTaskEx\Service\TimeRangeWeeklyScheduledService;
 use Combodo\iTop\Test\UnitTest\ItopTestCase;
 use DateTime;
 
@@ -19,7 +19,7 @@ class TimeRangeWeeklyScheduledServiceTest extends ItopTestCase
 		require_once(__DIR__.'/../../vendor/autoload.php');
 		date_default_timezone_set('UTC');
 		$this->TEST_LOG_FILE = APPROOT.'log/test.log';
-		ComplexBackgroundTaskLog::Enable($this->TEST_LOG_FILE);
+		BackgroundTaskExLog::Enable($this->TEST_LOG_FILE);
 		@unlink($this->TEST_LOG_FILE);
 	}
 
@@ -43,7 +43,7 @@ class TimeRangeWeeklyScheduledServiceTest extends ItopTestCase
 	 * @param $aDays
 	 *
 	 * @return void
-	 * @throws \Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException
+	 * @throws \Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExException
 	 */
 	public function testGetNextOccurrence($sExpected, $bEnabled, $sStartTime, $sEndTime, $sCurrentTime, $aDays)
 	{

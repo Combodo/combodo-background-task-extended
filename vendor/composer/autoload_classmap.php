@@ -6,11 +6,11 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Combodo\\iTop\\ComplexBackgroundTask\\Helper\\ComplexBackgroundTaskException' => $baseDir . '/src/Helper/ComplexBackgroundTaskException.php',
-    'Combodo\\iTop\\ComplexBackgroundTask\\Helper\\ComplexBackgroundTaskHelper' => $baseDir . '/src/Helper/ComplexBackgroundTaskHelper.php',
-    'Combodo\\iTop\\ComplexBackgroundTask\\Helper\\ComplexBackgroundTaskLog' => $baseDir . '/src/Helper/ComplexBackgroundTaskLog.php',
-    'Combodo\\iTop\\ComplexBackgroundTask\\Service\\ComplexBackgroundTaskService' => $baseDir . '/src/Service/ComplexBackgroundTaskService.php',
-    'Combodo\\iTop\\ComplexBackgroundTask\\Service\\DatabaseService' => $baseDir . '/src/Service/DatabaseService.php',
-    'Combodo\\iTop\\ComplexBackgroundTask\\Service\\TimeRangeWeeklyScheduledService' => $baseDir . '/src/Service/TimeRangeWeeklyScheduledService.php',
+    'Combodo\\iTop\\BackgroundTaskEx\\Helper\\BackgroundTaskExException' => $baseDir . '/src/Helper/BackgroundTaskExException.php',
+    'Combodo\\iTop\\BackgroundTaskEx\\Helper\\BackgroundTaskExHelper' => $baseDir . '/src/Helper/BackgroundTaskExHelper.php',
+    'Combodo\\iTop\\BackgroundTaskEx\\Helper\\BackgroundTaskExLog' => $baseDir . '/src/Helper/BackgroundTaskExLog.php',
+    'Combodo\\iTop\\BackgroundTaskEx\\Service\\BackgroundTaskExService' => $baseDir . '/src/Service/BackgroundTaskExService.php',
+    'Combodo\\iTop\\BackgroundTaskEx\\Service\\DatabaseService' => $baseDir . '/src/Service/DatabaseService.php',
+    'Combodo\\iTop\\BackgroundTaskEx\\Service\\TimeRangeWeeklyScheduledService' => $baseDir . '/src/Service/TimeRangeWeeklyScheduledService.php',
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
 );

@@ -9,24 +9,24 @@ class ComposerStaticInit618e8d9b0dbca93a1c8a882432ef24bd
     public static $prefixLengthsPsr4 = array (
         'C' => 
         array (
-            'Combodo\\iTop\\ComplexBackgroundTask\\' => 35,
+            'Combodo\\iTop\\BackgroundTaskEx\\' => 30,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Combodo\\iTop\\ComplexBackgroundTask\\' => 
+        'Combodo\\iTop\\BackgroundTaskEx\\' => 
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),
     );
 
     public static $classMap = array (
-        'Combodo\\iTop\\ComplexBackgroundTask\\Helper\\ComplexBackgroundTaskException' => __DIR__ . '/../..' . '/src/Helper/ComplexBackgroundTaskException.php',
-        'Combodo\\iTop\\ComplexBackgroundTask\\Helper\\ComplexBackgroundTaskHelper' => __DIR__ . '/../..' . '/src/Helper/ComplexBackgroundTaskHelper.php',
-        'Combodo\\iTop\\ComplexBackgroundTask\\Helper\\ComplexBackgroundTaskLog' => __DIR__ . '/../..' . '/src/Helper/ComplexBackgroundTaskLog.php',
-        'Combodo\\iTop\\ComplexBackgroundTask\\Service\\ComplexBackgroundTaskService' => __DIR__ . '/../..' . '/src/Service/ComplexBackgroundTaskService.php',
-        'Combodo\\iTop\\ComplexBackgroundTask\\Service\\DatabaseService' => __DIR__ . '/../..' . '/src/Service/DatabaseService.php',
-        'Combodo\\iTop\\ComplexBackgroundTask\\Service\\TimeRangeWeeklyScheduledService' => __DIR__ . '/../..' . '/src/Service/TimeRangeWeeklyScheduledService.php',
+        'Combodo\\iTop\\BackgroundTaskEx\\Helper\\BackgroundTaskExException' => __DIR__ . '/../..' . '/src/Helper/BackgroundTaskExException.php',
+        'Combodo\\iTop\\BackgroundTaskEx\\Helper\\BackgroundTaskExHelper' => __DIR__ . '/../..' . '/src/Helper/BackgroundTaskExHelper.php',
+        'Combodo\\iTop\\BackgroundTaskEx\\Helper\\BackgroundTaskExLog' => __DIR__ . '/../..' . '/src/Helper/BackgroundTaskExLog.php',
+        'Combodo\\iTop\\BackgroundTaskEx\\Service\\BackgroundTaskExService' => __DIR__ . '/../..' . '/src/Service/BackgroundTaskExService.php',
+        'Combodo\\iTop\\BackgroundTaskEx\\Service\\DatabaseService' => __DIR__ . '/../..' . '/src/Service/DatabaseService.php',
+        'Combodo\\iTop\\BackgroundTaskEx\\Service\\TimeRangeWeeklyScheduledService' => __DIR__ . '/../..' . '/src/Service/TimeRangeWeeklyScheduledService.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
     );
 

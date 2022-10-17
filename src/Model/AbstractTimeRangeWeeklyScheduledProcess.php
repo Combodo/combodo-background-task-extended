@@ -5,8 +5,8 @@
  */
 
 
-use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskHelper;
-use Combodo\iTop\ComplexBackgroundTask\Service\TimeRangeWeeklyScheduledService;
+use Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExHelper;
+use Combodo\iTop\BackgroundTaskEx\Service\TimeRangeWeeklyScheduledService;
 
 abstract class AbstractTimeRangeWeeklyScheduledProcess extends AbstractWeeklyScheduledProcess
 {
@@ -14,7 +14,7 @@ abstract class AbstractTimeRangeWeeklyScheduledProcess extends AbstractWeeklySch
 
 	protected function GetModuleName()
 	{
-		return ComplexBackgroundTaskHelper::MODULE_NAME;
+		return BackgroundTaskExHelper::MODULE_NAME;
 	}
 
 	/**
@@ -39,7 +39,7 @@ abstract class AbstractTimeRangeWeeklyScheduledProcess extends AbstractWeeklySch
 	 * @param string $sCurrentTime date formatted
 	 *
 	 * @return \DateTime
-	 * @throws \Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException
+	 * @throws \Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExException
 	 * @throws \ProcessInvalidConfigException
 	 */
 	public function GetNextOccurrence($sCurrentTime = 'now')
@@ -50,7 +50,7 @@ abstract class AbstractTimeRangeWeeklyScheduledProcess extends AbstractWeeklySch
 	}
 
 	/**
-	 * @return \Combodo\iTop\ComplexBackgroundTask\Service\TimeRangeWeeklyScheduledService
+	 * @return \Combodo\iTop\BackgroundTaskEx\Service\TimeRangeWeeklyScheduledService
 	 * @throws \ProcessInvalidConfigException
 	 */
 	public function GetWeeklyScheduledService(): TimeRangeWeeklyScheduledService

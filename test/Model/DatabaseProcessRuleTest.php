@@ -4,10 +4,10 @@
  * @license     http://opensource.org/licenses/AGPL-3.0
  */
 
-namespace Combodo\iTop\ComplexBackgroundTask\Test\Model;
+namespace Combodo\iTop\BackgroundTaskEx\Test\Model;
 
-use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskLog;
-use Combodo\iTop\ComplexBackgroundTask\Model\DatabaseProcessRule;
+use Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExLog;
+use Combodo\iTop\BackgroundTaskEx\Model\DatabaseProcessRule;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 
 /**
@@ -28,7 +28,7 @@ class DatabaseProcessRuleTest extends ItopDataTestCase
 		$this->debug('----- Test '.$this->getName());
 
 		$this->TEST_LOG_FILE = APPROOT.'log/test.log';
-		ComplexBackgroundTaskLog::Enable($this->TEST_LOG_FILE);
+		BackgroundTaskExLog::Enable($this->TEST_LOG_FILE);
 		@unlink($this->TEST_LOG_FILE);
 	}
 

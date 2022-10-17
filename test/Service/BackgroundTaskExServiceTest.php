@@ -4,10 +4,10 @@
  * @license     http://opensource.org/licenses/AGPL-3.0
  */
 
-namespace Combodo\iTop\ComplexBackgroundTask\Test\Service;
+namespace Combodo\iTop\BackgroundTaskEx\Test\Service;
 
-use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskLog;
-use Combodo\iTop\ComplexBackgroundTask\Service\ComplexBackgroundTaskService;
+use Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExLog;
+use Combodo\iTop\BackgroundTaskEx\Service\BackgroundTaskExService;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 use MetaModel;
 
@@ -17,7 +17,7 @@ use MetaModel;
  * @preserveGlobalState disabled
  * @backupGlobals disabled
  */
-class ComplexBackgroundTaskServiceTest extends ItopDataTestCase
+class BackgroundTaskExServiceTest extends ItopDataTestCase
 {
 	const USE_TRANSACTION = true;
 	const CREATE_TEST_ORG = false;
@@ -37,7 +37,7 @@ class ComplexBackgroundTaskServiceTest extends ItopDataTestCase
 
 
 		$this->TEST_LOG_FILE = APPROOT.'log/test.log';
-		ComplexBackgroundTaskLog::Enable($this->TEST_LOG_FILE);
+		BackgroundTaskExLog::Enable($this->TEST_LOG_FILE);
 		@unlink($this->TEST_LOG_FILE);
 	}
 
@@ -68,8 +68,8 @@ class ComplexBackgroundTaskServiceTest extends ItopDataTestCase
 	 */
 	public function testProcessOneTask($sExpectedStatus, $sInitialStatus, $sInitialAction, $sExpectedActionParams, $aActions, $aActionParams)
 	{
-		$oService = new ComplexBackgroundTaskService();
-		ComplexBackgroundTaskLog::Enable($this->TEST_LOG_FILE);
+		$oService = new BackgroundTaskExService();
+		BackgroundTaskExLog::Enable($this->TEST_LOG_FILE);
 
 		/** @var \MockTestTask $oTask */
 		$oTask = MetaModel::NewObject('MockTestTask');
@@ -89,7 +89,7 @@ class ComplexBackgroundTaskServiceTest extends ItopDataTestCase
 		}
 		$oTask->SetActions($aTaskActions);
 
-		$sStatus = $this->InvokeNonPublicMethod(ComplexBackgroundTaskService::class, 'ProcessOneTask', $oService, [$oTask]);
+		$sStatus = $this->InvokeNonPublicMethod(BackgroundTaskExService::class, 'ProcessOneTask', $oService, [$oTask]);
 
 		$this->assertEquals($sExpectedStatus, $sStatus, 'Checking status');
 		$this->assertEquals($sExpectedActionParams, $oTask->Get('action_params'), 'Checking action_params');

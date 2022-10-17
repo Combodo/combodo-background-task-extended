@@ -1,12 +1,12 @@
 <?php
 
-use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskLog;
+use Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExLog;
 
 /**
  * @copyright   Copyright (C) 2010-2022 Combodo SARL
  * @license     http://opensource.org/licenses/AGPL-3.0
  */
-class MockTestTask extends ComplexBackgroundTask
+class MockTestTask extends BackgroundTaskEx
 {
 	private $aActions = [];
 
@@ -35,7 +35,7 @@ class MockTestTask extends ComplexBackgroundTask
 	public function GetNextAction()
 	{
 		$iActionId = $this->Get('current_action_id');
-		ComplexBackgroundTaskLog::Info("GetNextAction: Current action is [$iActionId]");
+		BackgroundTaskExLog::Info("GetNextAction: Current action is [$iActionId]");
 		if (!$iActionId) {
 			if (isset($this->aActions[0])) {
 				$this->Set('current_action_id', 1);

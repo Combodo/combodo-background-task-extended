@@ -4,7 +4,7 @@
  * @license     http://opensource.org/licenses/AGPL-3.0
  */
 
-namespace Combodo\iTop\ComplexBackgroundTask\Service;
+namespace Combodo\iTop\BackgroundTaskEx\Service;
 
 use CMDBSource;
 use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException;
@@ -30,7 +30,7 @@ class DatabaseService
 	 * @param int $iMaxChunkSize
 	 *
 	 * @return bool
-	 * @throws \Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException
+	 * @throws \Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExException
 	 * @throws \CoreException
 	 * @throws \MySQLException
 	 * @throws \MySQLHasGoneAwayException
@@ -79,7 +79,7 @@ class DatabaseService
 	 * @param int $iMaxChunkSize
 	 *
 	 * @return bool
-	 * @throws \Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException
+	 * @throws \Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExException
 	 * @throws \ConfigException
 	 * @throws \CoreException
 	 * @throws \MissingQueryArgument
@@ -128,7 +128,7 @@ class DatabaseService
 	 *
 	 * @return bool true if all objects where computed, false if other objects need to be computed later
 	 *
-	 * @throws \Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException
+	 * @throws \Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExException
 	 * @throws \CoreException
 	 * @throws \MySQLException
 	 * @throws \MySQLHasGoneAwayException
@@ -211,7 +211,7 @@ class DatabaseService
 	 * @param int $iMaxChunkSize
 	 *
 	 * @return array
-	 * @throws \Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException
+	 * @throws \Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExException
 	 */
 	public function BuildQuerySetForTemporaryTable(string $sSearchKey, string $sSqlSearch, array $aSqlApply, string $sKey, string $sTempTable, int $iMaxChunkSize): array
 	{
@@ -252,7 +252,7 @@ class DatabaseService
 	 *
 	 * @return bool true if all objects where computed, false if other objects need to be computed later
 	 *
-	 * @throws \Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException
+	 * @throws \Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExException
 	 * @throws \CoreException
 	 * @throws \MySQLException
 	 * @throws \MySQLHasGoneAwayException

@@ -4,9 +4,9 @@
  * @license     http://opensource.org/licenses/AGPL-3.0
  */
 
-namespace Combodo\iTop\ComplexBackgroundTask\Service;
+namespace Combodo\iTop\BackgroundTaskEx\Service;
 
-use Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException;
+use Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExException;
 use DateTime;
 
 class TimeRangeWeeklyScheduledService
@@ -20,7 +20,7 @@ class TimeRangeWeeklyScheduledService
 	 * @param int $iCurrentTime
 	 *
 	 * @return \DateTime
-	 * @throws \Combodo\iTop\ComplexBackgroundTask\Helper\ComplexBackgroundTaskException
+	 * @throws \Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExException
 	 */
 	public function GetNextOccurrence($iCurrentTime)
 	{
@@ -30,10 +30,10 @@ class TimeRangeWeeklyScheduledService
 		}
 
 		if (!preg_match('/[0-2][0-9]:[0-5][0-9]/', $this->sStartTime)) {
-			throw new ComplexBackgroundTaskException("Wrong format for setting 'start time' (found '$this->sStartTime')");
+			throw new BackgroundTaskExException("Wrong format for setting 'start time' (found '$this->sStartTime')");
 		}
 		if (!preg_match('/[0-2][0-9]:[0-5][0-9]/', $this->sEndTime)) {
-			throw new ComplexBackgroundTaskException("Wrong format for setting 'end time' (found '$this->sEndTime')");
+			throw new BackgroundTaskExException("Wrong format for setting 'end time' (found '$this->sEndTime')");
 		}
 		$iStartTimeToday = $this->GetTodayTimeStamp($iCurrentTime, $this->sStartTime);
 		$iEndTimeToday = $this->GetTodayTimeStamp($iCurrentTime, $this->sEndTime);
