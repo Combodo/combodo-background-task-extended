@@ -152,11 +152,20 @@ class DatabaseService
 				$this->DebugDuration($fStart, '');
 			}
 
-			foreach ($aQueries['apply'] as $sSQL) {
-				BackgroundTaskExLog::Debug($sSQL);
-				$fStart = microtime(true);
-				CMDBSource::Query($sSQL);
-				$this->DebugDuration($fStart, '');
+			$oResult = CMDBSource::Query("SELECT COUNT(*) AS COUNT, MAX(`$sSearchKey`) AS MAX FROM `$sTempTable`");
+			$aRow = $oResult->fetch_assoc();
+			$iCount = $aRow['COUNT'];
+			$sId = $aRow['MAX'];
+
+			BackgroundTaskExLog::Debug("Found $iCount entries up to $sId to process");
+
+			if ($iCount > 0) {
+				foreach ($aQueries['apply'] as $sSQL) {
+					BackgroundTaskExLog::Debug($sSQL);
+					$fStart = microtime(true);
+					CMDBSource::Query($sSQL);
+					$this->DebugDuration($fStart, '');
+				}
 			}
 
 			BackgroundTaskExLog::Debug($aQueries['cleanup']);
@@ -260,7 +269,7 @@ class DatabaseService
 		$fStart = microtime(true);
 		$oRes = CMDBSource::Query("SELECT COALESCE(MAX(`$sKey`), 0) FROM `$sTable`");
 		$aRow = $oRes->fetch_array(MYSQLI_NUM);
-		$this->DebugDuration($fStart, "Query max $sKey for $sTable");
+		$this->DebugDuration($fStart, "Query max $sKey for $sTable: $aRow[0]");
 
 		return $aRow[0];
 	}
