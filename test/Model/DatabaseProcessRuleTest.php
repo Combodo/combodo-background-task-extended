@@ -63,7 +63,7 @@ class DatabaseProcessRuleTest extends ItopDataTestCase
 		$this->assertEquals($sExpKey, $aParams['key']);
 		$this->assertEquals($sExpSearchKey, $aParams['search_key']);
 
-		$aQueries = $oService->BuildQuerySetForTemporaryTable($aParams['search_key'], $aParams['search_query'], $aParams['apply_queries'], $aParams['key'], 'temp', 1000);
+		$aQueries = $oService->BuildQuerySetForTemporaryTable($aParams['search_key'], $aParams['search_query'], $aParams['apply_queries'], $aParams['key'], 'temp');
 
 		$this->debug($aQueries);
 	}

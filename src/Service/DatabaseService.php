@@ -26,7 +26,7 @@ class DatabaseService
 
 	/**
 	 * @param \DatabaseProcessRule $oDBProcessRule
-	 * @param string $sProgress
+	 * @param int $sProgress
 	 * @param int $iMaxChunkSize
 	 *
 	 * @return bool
@@ -35,7 +35,7 @@ class DatabaseService
 	 * @throws \MySQLException
 	 * @throws \MySQLHasGoneAwayException
 	 */
-	public function ExecuteRuleByChunk(DatabaseProcessRule $oDBProcessRule, string &$sProgress, int $iMaxChunkSize): bool
+	public function ExecuteRuleByChunk(DatabaseProcessRule $oDBProcessRule, int &$sProgress, int $iMaxChunkSize): bool
 	{
 		$aParams = $this->GetParamsForPurgeProcess($oDBProcessRule);
 
@@ -64,19 +64,23 @@ class DatabaseService
 			$aApplyQueries[$sDBTable] = "DELETE `$sDBTable` FROM `$sDBTable` /*JOIN*/";
 		}
 		$sKey = MetaModel::DBGetKey($sMainClass);
+		$sTable = MetaModel::DBGetTable($sMainClass);
+		$iMaxProgress = $this->QueryMaxKey($sKey, $sTable);
 		$sSqlSearch = $this->GetSqlFromOQL($oFilter->ToOQL(true));
+
 		return [
-			'name' => $sMainClass,
-			'search_key' => $sMainClassAlias.$sKey,
-			'key' => $sKey,
-			'search_query' => $sSqlSearch,
+			'name'          => $sMainClass,
+			'search_key'    => $sMainClassAlias.$sKey,
+			'key'           => $sKey,
+			'search_max_id' => $iMaxProgress,
+			'search_query'  => $sSqlSearch,
 			'apply_queries' => $aApplyQueries,
 		];
 	}
 
 	/**
 	 * @param array $aRule
-	 * @param string $sProgress
+	 * @param int $iProgress
 	 * @param int $iMaxChunkSize
 	 *
 	 * @return bool
@@ -88,25 +92,30 @@ class DatabaseService
 	 * @throws \MySQLHasGoneAwayException
 	 * @throws \OQLException
 	 */
-	public function ExecuteQueriesByChunk(array $aRule, string &$sProgress, int $iMaxChunkSize): bool
+	public function ExecuteQueriesByChunk(array $aRule, int &$iProgress, int $iMaxChunkSize): bool
 	{
 		$sSearchKey = $aRule['search_key'] ?? null;
 		$sSqlSearch = $aRule['search_query'] ?? null;
-		$sOqlSearch = $aRule['search_oql'] ?? null;
 		$aSqlApply = $aRule['apply_queries'] ?? null;
 		$sKey = $aRule['key'] ?? null;
+		$iMaxProgress = $aRule['search_max_id'] ?? null;
 
-		if (is_null($sSearchKey) || !is_array($aSqlApply) || is_null($sKey) || (is_null($sSqlSearch) && is_null($sOqlSearch))) {
+		if (is_null($sSearchKey) || is_null($iMaxProgress) || !is_array($aSqlApply) || is_null($sKey) || is_null($sSqlSearch)) {
 			throw new BackgroundTaskExException("Bad parameters: ".var_export($aRule, true));
 		}
 
-		if (!is_null($sOqlSearch)) {
-			$sSqlSearch = $this->GetSqlFromOQL($sOqlSearch);
+		$iMaxKey = $iProgress + $iMaxChunkSize;
+		$sSqlSearch = "$sSqlSearch AND `$sSearchKey` > $iProgress AND `$sSearchKey` <= $iMaxKey";
+
+		$bCompleted = $this->ExecuteSQLQueriesByChunkWithTempTable($sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $iProgress, $iMaxChunkSize);
+		$bCompleted = $bCompleted || ($iMaxKey >= $iMaxProgress);
+		if ($bCompleted) {
+			$iProgress = -1;
 		} else {
-			$sSqlSearch = "$sSqlSearch AND `$sSearchKey` > $sProgress ORDER BY `$sSearchKey`";
+			$iProgress = $iMaxKey;
 		}
 
-		return $this->ExecuteSQLQueriesByChunkWithTempTable($sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $sProgress, $iMaxChunkSize);
+		return $bCompleted;
 	}
 
 	/**
@@ -118,7 +127,7 @@ class DatabaseService
 	 * @param string $sSqlSearch SQL request to find the rows to compute (should return a list of keys)
 	 * @param array $aSqlApply array to update/delete elements found by $sSqlSearch, don't specify the where close
 	 * @param string $sKey primary key of updated table
-	 * @param string $sProgress start the search after this value => updated with the last id computed
+	 * @param int $iProgress start the search after this value => updated with the last id computed
 	 * @param int $iMaxChunkSize limit the size of processed data
 	 *
 	 * @return bool true if all objects where computed, false if other objects need to be computed later
@@ -128,47 +137,34 @@ class DatabaseService
 	 * @throws \MySQLException
 	 * @throws \MySQLHasGoneAwayException
 	 */
-	private function ExecuteSQLQueriesByChunkWithTempTable(string $sSearchKey, string $sSqlSearch, array $aSqlApply, string $sKey, string &$sProgress, int $iMaxChunkSize): bool
+	private function ExecuteSQLQueriesByChunkWithTempTable(string $sSearchKey, string $sSqlSearch, array $aSqlApply, string $sKey, int $iProgress, int $iMaxChunkSize): bool
 	{
-		$sId = $sProgress;
 		BackgroundTaskExLog::Debug('START TRANSACTION');
 		CMDBSource::Query('START TRANSACTION');
 		try {
 			$sTempTable = $this->GetTempTableName();
 
-			$aQueries = $this->BuildQuerySetForTemporaryTable($sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $sTempTable, $iMaxChunkSize);
+			$aQueries = $this->BuildQuerySetForTemporaryTable($sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $sTempTable);
 			foreach ($aQueries['search'] as $sSQL) {
 				BackgroundTaskExLog::Debug($sSQL);
+				$fStart = microtime(true);
 				CMDBSource::Query($sSQL);
+				$this->DebugDuration($fStart, '');
 			}
 
-			$oResult = CMDBSource::Query("SELECT COUNT(*) AS COUNT, MAX(`$sSearchKey`) AS MAX FROM `$sTempTable`");
-			$aRow = $oResult->fetch_assoc();
-			$iCount = $aRow['COUNT'];
-			$sId = $aRow['MAX'];
-
-			BackgroundTaskExLog::Debug("Found $iCount entries up to $sId to process");
-
-			if ($iCount > 0) {
-				foreach ($aQueries['apply'] as $sSQL) {
-					BackgroundTaskExLog::Debug($sSQL);
-					CMDBSource::Query($sSQL);
-				}
+			foreach ($aQueries['apply'] as $sSQL) {
+				BackgroundTaskExLog::Debug($sSQL);
+				$fStart = microtime(true);
+				CMDBSource::Query($sSQL);
+				$this->DebugDuration($fStart, '');
 			}
+
 			BackgroundTaskExLog::Debug($aQueries['cleanup']);
 			CMDBSource::Query($aQueries['cleanup']);
 			BackgroundTaskExLog::Debug('COMMIT');
 			CMDBSource::Query('COMMIT');
-			// Save progression
-			$sProgress = $sId;
-
-			if ($iCount < $iMaxChunkSize) {
-				// completed
-				$sProgress = -1;
-
-				return true;
-			}
-		} catch (MySQLHasGoneAwayException $e) {
+		}
+		catch (MySQLHasGoneAwayException $e) {
 			// Allow to retry the same set
 			BackgroundTaskExLog::Error('ROLLBACK: '.$e->getMessage());
 			CMDBSource::Query('ROLLBACK');
@@ -177,13 +173,12 @@ class DatabaseService
 				throw new BackgroundTaskExException($e->getMessage());
 			}
 			throw $e;
-		} catch (Exception $e) {
+		}
+		catch (Exception $e) {
 			BackgroundTaskExLog::Error('ROLLBACK: '.$e->getMessage());
 			CMDBSource::Query('ROLLBACK');
 			if ($iMaxChunkSize == 1) {
-				// Ignore current entries and skip to the next ones
-				$sProgress = $sId;
-
+				// Ignore current entries and skip to the next one
 				return false;
 			}
 
@@ -209,17 +204,16 @@ class DatabaseService
 	 * @param array $aSqlApply
 	 * @param string $sKey
 	 * @param string $sTempTable
-	 * @param int $iMaxChunkSize
 	 *
 	 * @return array
 	 * @throws \Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExException
 	 */
-	public function BuildQuerySetForTemporaryTable(string $sSearchKey, string $sSqlSearch, array $aSqlApply, string $sKey, string $sTempTable, int $iMaxChunkSize): array
+	public function BuildQuerySetForTemporaryTable(string $sSearchKey, string $sSqlSearch, array $aSqlApply, string $sKey, string $sTempTable): array
 	{
 		$aRequests = [];
 		$aRequests['search'] = [
 			"DROP TEMPORARY TABLE IF EXISTS `$sTempTable`",
-			"CREATE TEMPORARY TABLE `$sTempTable` ($sSqlSearch LIMIT $iMaxChunkSize)",
+			"CREATE TEMPORARY TABLE `$sTempTable` ($sSqlSearch)",
 		];
 
 		$aApplyQueries = [];
@@ -259,6 +253,22 @@ class DatabaseService
 		}
 
 		return $oFilter->MakeSelectQuery([], [], $aAttToLoad);
+	}
+
+	public function QueryMaxKey($sKey, $sTable)
+	{
+		$fStart = microtime(true);
+		$oRes = CMDBSource::Query("SELECT COALESCE(MAX(`$sKey`), 0) FROM `$sTable`");
+		$aRow = $oRes->fetch_array(MYSQLI_NUM);
+		$this->DebugDuration($fStart, "Query max $sKey for $sTable");
+
+		return $aRow[0];
+	}
+
+	private function DebugDuration($fStart, $sMessage)
+	{
+		$fDuration = microtime(true) - $fStart;
+		BackgroundTaskExLog::Debug(sprintf("$sMessage duration: %.2fs", $fDuration));
 	}
 
 	/**
@@ -302,7 +312,8 @@ class DatabaseService
 				CMDBSource::Query('COMMIT');
 				// Save progression
 				$sProgress = $sId;
-			} catch (MySQLHasGoneAwayException $e) {
+			}
+			catch (MySQLHasGoneAwayException $e) {
 				// Allow to retry the same set
 				CMDBSource::Query('ROLLBACK');
 				if ($iMaxChunkSize == 1) {
@@ -310,7 +321,8 @@ class DatabaseService
 					throw new BackgroundTaskExException($e->getMessage());
 				}
 				throw $e;
-			} catch (Exception $e) {
+			}
+			catch (Exception $e) {
 				CMDBSource::Query('ROLLBACK');
 				if ($iMaxChunkSize == 1) {
 					// Ignore current entries and skip to the next ones
