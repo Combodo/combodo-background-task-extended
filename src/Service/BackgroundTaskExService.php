@@ -8,6 +8,7 @@ use Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExLog;
 use DBObjectSet;
 use DBSearch;
 use Exception;
+use iTopMutex;
 use MetaModel;
 
 class BackgroundTaskExService
@@ -33,24 +34,37 @@ class BackgroundTaskExService
 	 * @throws \CoreUnexpectedValue
 	 * @throws \OQLException
 	 * @throws \ArchivedObjectException
+	 * @throws \Exception
 	 */
 	public function ProcessTasks($sClass, &$sMessage): bool
 	{
-		if (is_null($sMessage)) {
-			$sMessage = '';
+		// Avoid parallelization for now
+		$oMutex = new iTopMutex('BackgroundTaskExService');
+		try {
+			if ($oMutex->TryLock()) {
+				if (is_null($sMessage)) {
+					$sMessage = '';
+				}
+				// Process Error tasks first
+				if (!$this->ProcessTaskList("SELECT `$sClass` WHERE status = 'running'", $sMessage)) {
+					return false;
+				}
+
+				// Process paused tasks
+				if (!$this->ProcessTaskList("SELECT `$sClass` WHERE status = 'paused'", $sMessage)) {
+					return false;
+				}
+
+				// New tasks to process
+				return $this->ProcessTaskList("SELECT `$sClass` WHERE status = 'created'", $sMessage);
+			} else {
+				return false;
+			}
 		}
-		// Process Error tasks first
-		if (!$this->ProcessTaskList("SELECT `$sClass` WHERE status = 'running'", $sMessage)) {
-			return false;
+		finally {
+			$oMutex->Unlock();
 		}
 
-		// Process paused tasks
-		if (!$this->ProcessTaskList("SELECT `$sClass` WHERE status = 'paused'", $sMessage)) {
-			return false;
-		}
-
-		// New tasks to process
-		return $this->ProcessTaskList("SELECT `$sClass` WHERE status = 'created'", $sMessage);
 	}
 
 	/**
@@ -155,7 +169,8 @@ class BackgroundTaskExService
 					}
 					BackgroundTaskExLog::Debug("ProcessTask: status: $sStatus, action: $sAction end");
 				}
-			} catch (Exception $e) {
+			}
+			catch (Exception $e) {
 				// stay in 'running' status
 				BackgroundTaskExLog::Error($e->getMessage());
 				$bInProgress = false;
