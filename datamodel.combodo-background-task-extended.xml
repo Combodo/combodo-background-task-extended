@@ -61,7 +61,7 @@
        {
             $sCurrentActionId = $this->Get('current_action_id');
             if ($sCurrentActionId) {
-                return MetaModel::GetObject('BackgroundTaskExAction', $sCurrentActionId);
+                return MetaModel::GetObject('BackgroundTaskExAction', $sCurrentActionId, false);
             }
             return null;
        }
@@ -78,8 +78,10 @@
             if ($sCurrentActionId) {
                 // Remove current action
                 $this->Set('current_action_id', null);
-                $oAction = MetaModel::GetObject('BackgroundTaskExAction', $sCurrentActionId);
-                $oAction->DBDelete();
+                $oAction = MetaModel::GetObject('BackgroundTaskExAction', $sCurrentActionId, false);
+                if ($oAction) {
+                    $oAction->DBDelete();
+                }
             }
             $sId = $this->GetKey();
             $oSet = new DBObjectSet(DBSearch::FromOQL("SELECT BackgroundTaskExAction WHERE task_id=:id"), ['rank' => true], ['id' => $sId]);

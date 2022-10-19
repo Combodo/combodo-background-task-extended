@@ -132,7 +132,7 @@ class BackgroundTaskExService
 						$oAction = $oTask->GetCurrentAction();
 						if (is_null($oAction)) {
 							$sStatus = 'finished';
-							$bInProgress = false;
+							// try to move to the next action
 						} else {
 							$bCanContinue = $oAction->ChangeActionParamsOnError();
 							if (!$bCanContinue) {
@@ -151,7 +151,7 @@ class BackgroundTaskExService
 						break;
 				}
 
-				if ($bInProgress) {
+				if ($bInProgress && !is_null($oAction)) {
 					$sAction = $oAction->Get('friendlyname');
 					BackgroundTaskExLog::Debug("ProcessTask: status: $sStatus, action: $sAction begin");
 					$sStatus = 'running';
