@@ -178,7 +178,7 @@ class DatabaseService
 			BackgroundTaskExLog::Debug('COMMIT');
 			CMDBSource::Query('COMMIT');
 
-			if (count($aExtensions) > 0) {
+			if (count($aExtensions) > 0  /*&& $iCount > 0*/) {
 				$oResult = CMDBSource::Query("SELECT `$sSearchKey` FROM `$sTempTable`");
 				$aObjects = [];
 				while ($oRaw = $oResult->fetch_assoc()) {
@@ -188,8 +188,10 @@ class DatabaseService
 
 				if (count($aObjects) > 0) {
 					// Inform that modifications have been done on that list of objects
-					/** @var \Combodo\iTop\BackgroundTaskEx\Service\iSQLUpdateExtension $oExtension */
-					foreach ($aExtensions as $oExtension) {
+					foreach ($aExtensions as $sExtension) {
+						BackgroundTaskExLog::Debug("Call iSQLUpdateExtension $sExtension");
+						/** @var \Combodo\iTop\BackgroundTaskEx\Service\iSQLUpdateExtension $oExtension */
+						$oExtension = new $sExtension();
 						$oExtension->OnSQLUpdate($sClass, $aObjects);
 					}
 				}
