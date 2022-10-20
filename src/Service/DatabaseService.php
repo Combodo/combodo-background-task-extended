@@ -182,7 +182,7 @@ class DatabaseService
 				$oResult = CMDBSource::Query("SELECT `$sSearchKey` FROM `$sTempTable`");
 				$aObjects = [];
 				while ($oRaw = $oResult->fetch_assoc()) {
-					$sId = $oRaw[$sKey];
+					$sId = $oRaw[$sSearchKey];
 					$aObjects[] = $sId;
 				}
 
