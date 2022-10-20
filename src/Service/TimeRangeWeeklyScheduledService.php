@@ -16,6 +16,16 @@ class TimeRangeWeeklyScheduledService
 	private $sEndTime;
 	private $aDays;
 
+	const WEEK_DAY_TO_N = array(
+		'monday'    => 1,
+		'tuesday'   => 2,
+		'wednesday' => 3,
+		'thursday'  => 4,
+		'friday'    => 5,
+		'saturday'  => 6,
+		'sunday'    => 7,
+	);
+
 	/**
 	 * @param int $iCurrentTime
 	 *
@@ -131,6 +141,7 @@ class TimeRangeWeeklyScheduledService
 		$oCurrent = new DateTime();
 		$oCurrent->setTimeStamp($iCurrentTime);
 		$iDay = $oCurrent->format('N');
+
 		return in_array($iDay, $this->aDays);
 	}
 
@@ -205,5 +216,61 @@ class TimeRangeWeeklyScheduledService
 	public function SetDays(array $aDays)
 	{
 		$this->aDays = $aDays;
+	}
+
+	/**
+	 * Interpret current setting for the week days
+	 *
+	 * @param string $sWeekDays
+	 *
+	 * @return array of int (1 = monday)
+	 * @throws \Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExException
+	 */
+	public function WeekDaysToNumeric(string $sWeekDays)
+	{
+		$aDays = array();
+
+		if ($sWeekDays !== '') {
+			$aWeekDaysRaw = explode(',', $sWeekDays);
+			foreach ($aWeekDaysRaw as $sWeekDay) {
+				$sWeekDay = strtolower(trim($sWeekDay));
+				if (array_key_exists($sWeekDay, static::WEEK_DAY_TO_N)) {
+					$aDays[] = static::WEEK_DAY_TO_N[$sWeekDay];
+				} else {
+					throw new BackgroundTaskExException("Wrong format for week days (found '$sWeekDay')");
+				}
+			}
+		}
+		if (count($aDays) === 0) {
+			throw new BackgroundTaskExException('No day selected');
+		}
+		$aDays = array_unique($aDays);
+		sort($aDays);
+
+		return $aDays;
+	}
+
+	/**
+	 * @param $aDays array of int (1 = monday)
+	 *
+	 * @return string
+	 * @throws \Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExException
+	 */
+	public function WeekDaysToString($aDays)
+	{
+		$aWeekDays = [];
+		foreach (static::WEEK_DAY_TO_N as $sDay => $iDay) {
+			if (in_array($iDay, $aDays)) {
+				$aWeekDays[] = $sDay;
+			} else {
+				throw new BackgroundTaskExException("Wrong format for days list found: ".var_export($aDays, true));
+			}
+		}
+
+		if (count($aWeekDays) == 0) {
+			throw new BackgroundTaskExException('No day selected');
+		}
+
+		return implode(', ', $aWeekDays);
 	}
 }

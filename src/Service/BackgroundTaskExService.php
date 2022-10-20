@@ -122,6 +122,7 @@ class BackgroundTaskExService
 						$oAction = $oTask->GetNextAction();
 						if (is_null($oAction)) {
 							$sStatus = 'finished';
+							// No next action
 							$bInProgress = false;
 						} else {
 							$oAction->InitActionParams();
@@ -137,7 +138,7 @@ class BackgroundTaskExService
 							$bCanContinue = $oAction->ChangeActionParamsOnError();
 							if (!$bCanContinue) {
 								$sStatus = 'finished';
-								$bInProgress = false;
+								// try to move to the next action
 							}
 						}
 						break;
@@ -146,7 +147,7 @@ class BackgroundTaskExService
 						$oAction = $oTask->GetCurrentAction();
 						if (is_null($oAction)) {
 							$sStatus = 'finished';
-							$bInProgress = false;
+							// try to move to the next action
 						}
 						break;
 				}
