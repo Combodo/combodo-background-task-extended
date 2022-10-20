@@ -12,5 +12,6 @@ return array(
     'Combodo\\iTop\\BackgroundTaskEx\\Service\\BackgroundTaskExService' => $baseDir . '/src/Service/BackgroundTaskExService.php',
     'Combodo\\iTop\\BackgroundTaskEx\\Service\\DatabaseService' => $baseDir . '/src/Service/DatabaseService.php',
     'Combodo\\iTop\\BackgroundTaskEx\\Service\\TimeRangeWeeklyScheduledService' => $baseDir . '/src/Service/TimeRangeWeeklyScheduledService.php',
+    'Combodo\\iTop\\BackgroundTaskEx\\Service\\iSQLUpdateExtension' => $baseDir . '/src/Service/iSQLUpdateExtension.php',
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
 );

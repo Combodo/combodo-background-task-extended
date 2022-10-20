@@ -8,6 +8,7 @@ namespace Combodo\iTop\BackgroundTaskEx\Service;
 
 use CMDBSource;
 use Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExException;
+use Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExHelper;
 use Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExLog;
 use DatabaseProcessRule;
 use DBSearch;
@@ -19,9 +20,12 @@ class DatabaseService
 {
 	const TEMPORARY_TABLE = 'priv_temporary_ids_';
 
+	private $aSQLUpdateExtensions;
+
 	public function __construct()
 	{
 		BackgroundTaskExLog::Enable(APPROOT.'log/error.log');
+		$this->aSQLUpdateExtensions = null;
 	}
 
 	/**
@@ -69,6 +73,7 @@ class DatabaseService
 		$sSqlSearch = $this->GetSqlFromOQL($oFilter->ToOQL(true));
 
 		return [
+			'class'         => $sMainClass,
 			'name'          => $sMainClass,
 			'search_key'    => $sMainClassAlias.$sKey,
 			'key'           => $sKey,
@@ -94,20 +99,21 @@ class DatabaseService
 	 */
 	public function ExecuteQueriesByChunk(array $aRule, int &$iProgress, int $iMaxChunkSize): bool
 	{
+		$sClass = $aRule['class'] ?? null;
 		$sSearchKey = $aRule['search_key'] ?? null;
 		$sSqlSearch = $aRule['search_query'] ?? null;
 		$aSqlApply = $aRule['apply_queries'] ?? null;
 		$sKey = $aRule['key'] ?? null;
 		$iMaxProgress = $aRule['search_max_id'] ?? null;
 
-		if (is_null($sSearchKey) || is_null($iMaxProgress) || !is_array($aSqlApply) || is_null($sKey) || is_null($sSqlSearch)) {
+		if (is_null($sClass) || is_null($sSearchKey) || is_null($iMaxProgress) || !is_array($aSqlApply) || is_null($sKey) || is_null($sSqlSearch)) {
 			throw new BackgroundTaskExException("Bad parameters: ".var_export($aRule, true));
 		}
 
 		$iMaxKey = $iProgress + $iMaxChunkSize;
 		$sSqlSearch = "$sSqlSearch AND `$sSearchKey` > $iProgress AND `$sSearchKey` <= $iMaxKey";
 
-		$bCompleted = $this->ExecuteSQLQueriesByChunkWithTempTable($sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $iProgress, $iMaxChunkSize);
+		$bCompleted = $this->ExecuteSQLQueriesByChunkWithTempTable($sClass, $sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $iMaxChunkSize);
 		$bCompleted = $bCompleted || ($iMaxKey >= $iMaxProgress);
 		if ($bCompleted) {
 			$iProgress = -1;
@@ -127,7 +133,6 @@ class DatabaseService
 	 * @param string $sSqlSearch SQL request to find the rows to compute (should return a list of keys)
 	 * @param array $aSqlApply array to update/delete elements found by $sSqlSearch, don't specify the where close
 	 * @param string $sKey primary key of updated table
-	 * @param int $iProgress start the search after this value => updated with the last id computed
 	 * @param int $iMaxChunkSize limit the size of processed data
 	 *
 	 * @return bool true if all objects where computed, false if other objects need to be computed later
@@ -137,8 +142,10 @@ class DatabaseService
 	 * @throws \MySQLException
 	 * @throws \MySQLHasGoneAwayException
 	 */
-	private function ExecuteSQLQueriesByChunkWithTempTable(string $sSearchKey, string $sSqlSearch, array $aSqlApply, string $sKey, int $iProgress, int $iMaxChunkSize): bool
+	private function ExecuteSQLQueriesByChunkWithTempTable(string $sClass, string $sSearchKey, string $sSqlSearch, array $aSqlApply, string $sKey, int $iMaxChunkSize): bool
 	{
+		$aExtensions = $this->GetSQLUpdateExtensions();
+
 		BackgroundTaskExLog::Debug('START TRANSACTION');
 		CMDBSource::Query('START TRANSACTION');
 		try {
@@ -157,7 +164,7 @@ class DatabaseService
 			$iCount = $aRow['COUNT'];
 			$sId = $aRow['MAX'];
 
-			BackgroundTaskExLog::Debug("Found $iCount entries up to $sId to process");
+			BackgroundTaskExLog::Debug("Found $iCount entries up to id $sId to process");
 
 			if ($iCount > 0) {
 				foreach ($aQueries['apply'] as $sSQL) {
@@ -168,10 +175,28 @@ class DatabaseService
 				}
 			}
 
-			BackgroundTaskExLog::Debug($aQueries['cleanup']);
-			CMDBSource::Query($aQueries['cleanup']);
 			BackgroundTaskExLog::Debug('COMMIT');
 			CMDBSource::Query('COMMIT');
+
+			if (count($aExtensions) > 0) {
+				$oResult = CMDBSource::Query("SELECT `$sSearchKey` FROM `$sTempTable`");
+				$aObjects = [];
+				while ($oRaw = $oResult->fetch_assoc()) {
+					$sId = $oRaw[$sKey];
+					$aObjects[] = $sId;
+				}
+
+				if (count($aObjects) > 0) {
+					// Inform that modifications have been done on that list of objects
+					/** @var \Combodo\iTop\BackgroundTaskEx\Service\iSQLUpdateExtension $oExtension */
+					foreach ($aExtensions as $oExtension) {
+						$oExtension->OnSQLUpdate($sClass, $aObjects);
+					}
+				}
+			}
+
+			BackgroundTaskExLog::Debug($aQueries['cleanup']);
+			CMDBSource::Query($aQueries['cleanup']);
 		}
 		catch (MySQLHasGoneAwayException $e) {
 			// Allow to retry the same set
@@ -280,84 +305,14 @@ class DatabaseService
 		BackgroundTaskExLog::Debug(sprintf("$sMessage duration: %.2fs", $fDuration));
 	}
 
-	/**
-	 * Search objects to update/delete and execute update/delete of max_chunk_size elements.
-	 * Manage a progress value to keep track of the progression (keep the current value of the key).
-	 * This method needs to be called repeatedly until it returns true.
-	 *
-	 * @param string $sSqlSearch SQL request to find the rows to compute (should return a list of keys)
-	 * @param array $aSqlApply array to update/delete elements found by $sSqlSearch, don't specify the where close
-	 * @param string $sKey primary key of updated table
-	 * @param string $sProgress start the search after this value => updated with the last id computed
-	 * @param int $iMaxChunkSize limit the size of processed data
-	 *
-	 * @return bool true if all objects where computed, false if other objects need to be computed later
-	 *
-	 * @throws \Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExException
-	 * @throws \CoreException
-	 * @throws \MySQLException
-	 * @throws \MySQLHasGoneAwayException
-	 */
-	private function ExecuteSQLQueriesByChunkWithIn(string $sSqlSearch, array $aSqlApply, string $sKey, string &$sProgress, int $iMaxChunkSize): bool
+	private function GetSQLUpdateExtensions()
 	{
-		$sId = $sProgress;
-		$sSQL = $sSqlSearch." LIMIT ".$iMaxChunkSize;
-		BackgroundTaskExLog::Debug($sSQL);
-		$oResult = CMDBSource::Query($sSQL);
-
-		$aObjects = [];
-		if ($oResult->num_rows > 0) {
-			while ($oRaw = $oResult->fetch_assoc()) {
-				$sId = $oRaw[$sKey];
-				$aObjects[] = $sId;
-			}
-			CMDBSource::Query('START TRANSACTION');
-			try {
-				foreach ($aSqlApply as $sSqlUpdate) {
-					$sSQL = $sSqlUpdate." WHERE `$sKey` IN (".implode(', ', $aObjects).');';
-					BackgroundTaskExLog::Debug($sSQL);
-					CMDBSource::Query($sSQL);
-				}
-				CMDBSource::Query('COMMIT');
-				// Save progression
-				$sProgress = $sId;
-			}
-			catch (MySQLHasGoneAwayException $e) {
-				// Allow to retry the same set
-				CMDBSource::Query('ROLLBACK');
-				if ($iMaxChunkSize == 1) {
-					// This is hopeless for this entry
-					throw new BackgroundTaskExException($e->getMessage());
-				}
-				throw $e;
-			}
-			catch (Exception $e) {
-				CMDBSource::Query('ROLLBACK');
-				if ($iMaxChunkSize == 1) {
-					// Ignore current entries and skip to the next ones
-					$sProgress = $sId;
-					BackgroundTaskExLog::Error($e->getMessage());
-
-					return false;
-				}
-
-				// Try with a reduced set in order to find the entries in error
-				throw $e;
-			}
-			if (count($aObjects) < $iMaxChunkSize) {
-				// completed
-				$sProgress = -1;
-
-				return true;
-			}
-		} else {
-			$sProgress = -1;
-
-			return true;
+		if (is_null($this->aSQLUpdateExtensions)) {
+			$oBackgroundTaskExHelper = new BackgroundTaskExHelper();
+			$this->aSQLUpdateExtensions = $oBackgroundTaskExHelper->GetClassesForInterface(iSQLUpdateExtension::class);
 		}
 
-		// not completed yet
-		return false;
+		return $this->aSQLUpdateExtensions;
 	}
 
 	/**

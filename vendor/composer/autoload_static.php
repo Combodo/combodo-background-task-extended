@@ -27,6 +27,7 @@ class ComposerStaticInit618e8d9b0dbca93a1c8a882432ef24bd
         'Combodo\\iTop\\BackgroundTaskEx\\Service\\BackgroundTaskExService' => __DIR__ . '/../..' . '/src/Service/BackgroundTaskExService.php',
         'Combodo\\iTop\\BackgroundTaskEx\\Service\\DatabaseService' => __DIR__ . '/../..' . '/src/Service/DatabaseService.php',
         'Combodo\\iTop\\BackgroundTaskEx\\Service\\TimeRangeWeeklyScheduledService' => __DIR__ . '/../..' . '/src/Service/TimeRangeWeeklyScheduledService.php',
+        'Combodo\\iTop\\BackgroundTaskEx\\Service\\iSQLUpdateExtension' => __DIR__ . '/../..' . '/src/Service/iSQLUpdateExtension.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
     );
 
