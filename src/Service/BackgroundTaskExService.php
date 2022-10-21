@@ -157,7 +157,7 @@ class BackgroundTaskExService
 							$sStatus = 'recovering';
 							$oTask->Set('status', $sStatus);
 							$oTask->DBWrite();
-							BackgroundTaskExLog::Debug("ProcessTask: status: $sStatus, action: {$oAction->Get('friendlyname')} end");
+							BackgroundTaskExLog::Debug("ProcessTask: status: $sStatus, action: {$oAction->Get('friendlyname')} try restarting");
 
 							$bCanContinue = $oAction->ChangeActionParamsOnError();
 							if (!$bCanContinue) {
