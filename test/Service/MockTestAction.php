@@ -51,7 +51,7 @@ class MockTestAction extends BackgroundTaskExAction
 	/**
 	 * @inheritDoc
 	 */
-	public function InitActionParams()
+	public function InitActionParams(): bool
 	{
 		BackgroundTaskExLog::Info('InitActionParams called');
 		if (isset($this->aParams['Init'])) {
@@ -59,6 +59,12 @@ class MockTestAction extends BackgroundTaskExAction
 			$this->oTask->Set('action_params', $sValue);
 			BackgroundTaskExLog::Info("action_params: $sValue");
 		}
+		$ret = $this->aParams['InitReturn'] ?? true;
+		if (is_string($ret)) {
+			throw new $ret("Test InitActionParams Exception: $ret");
+		}
+
+		return $ret;
 	}
 
 	/**

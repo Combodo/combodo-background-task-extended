@@ -39,9 +39,12 @@
 					<default_value>created</default_value>
 					<tracking_level>none</tracking_level>
 					<values>
-						<value id="created">
-							<code>created</code>
-						</value>
+            <value id="created">
+              <code>created</code>
+            </value>
+            <value id="starting">
+              <code>starting</code>
+            </value>
             <value id="running">
               <code>running</code>
             </value>
@@ -146,11 +149,13 @@
 					<comment>
 						/**
 						* Initialize the action and save specific data
+            * @return bool true if action can continue
 						*/
 					</comment>
 					<code><![CDATA[
-       public function InitActionParams()
+       public function InitActionParams(): bool
        {
+       					return true;
        }
 ]]></code>
 				</method>
@@ -167,7 +172,7 @@
 					<code><![CDATA[
        public function ChangeActionParamsOnError(): bool
        {
-					return false;
+					return true;
        }
 ]]></code>
 				</method>

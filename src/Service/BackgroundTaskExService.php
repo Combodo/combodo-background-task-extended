@@ -130,7 +130,20 @@ class BackgroundTaskExService
 							// No next action
 							$bInProgress = false;
 						} else {
-							$oAction->InitActionParams();
+							$sStatus = 'starting';
+							$oTask->Set('status', $sStatus);
+							$oTask->DBWrite();
+							BackgroundTaskExLog::Debug("ProcessTask: status: $sStatus, action: {$oAction->Get('friendlyname')} end");
+
+							$bCanContinue = $oAction->InitActionParams();
+							if (!$bCanContinue) {
+								$sClass = get_class($oAction);
+								BackgroundTaskExLog::Info("$sClass {$oAction->Get('friendlyname')} $sStatus stopped, action deleted");
+								$sStatus = 'finished';
+								$oAction->DBDelete();
+								$oAction = null;
+								// try to move to the next action
+							}
 						}
 						break;
 
@@ -148,6 +161,8 @@ class BackgroundTaskExService
 
 							$bCanContinue = $oAction->ChangeActionParamsOnError();
 							if (!$bCanContinue) {
+								$sClass = get_class($oAction);
+								BackgroundTaskExLog::Info("$sClass {$oAction->Get('friendlyname')} $sStatus stopped, action deleted");
 								$sStatus = 'finished';
 								$oAction->DBDelete();
 								$oAction = null;
@@ -156,6 +171,7 @@ class BackgroundTaskExService
 						}
 						break;
 
+					case 'starting':
 					case 'recovering':
 						// recovering failed
 						$oAction = $oTask->GetCurrentAction();
@@ -164,6 +180,8 @@ class BackgroundTaskExService
 							// try to move to the next action
 						} else {
 							// recovering is hopeless, move to the next action
+							$sClass = get_class($oAction);
+							BackgroundTaskExLog::Error("$sClass {$oAction->Get('friendlyname')} $sStatus failed, action deleted");
 							$sStatus = 'finished';
 							$oAction->DBDelete();
 							$oAction = null;
