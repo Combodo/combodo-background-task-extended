@@ -166,6 +166,7 @@ class BackgroundTaskExService
 							// recovering is hopeless, move to the next action
 							$sStatus = 'finished';
 							$oAction->DBDelete();
+							$oAction = null;
 						}
 						break;
 
@@ -188,6 +189,8 @@ class BackgroundTaskExService
 					$bActionFinished = $oAction->ExecuteAction($this->iProcessEndTime);
 					if ($bActionFinished) {
 						$sStatus = 'finished';
+						$oAction->DBDelete();
+						$oAction = null;
 					} else {
 						$sStatus = 'paused';
 						$oTask->Set('status', $sStatus);
@@ -198,7 +201,7 @@ class BackgroundTaskExService
 				}
 			}
 			catch (Exception $e) {
-				// stay in 'running' status
+				// stay in 'previous' status
 				BackgroundTaskExLog::Error($e->getMessage());
 				$bInProgress = false;
 			}

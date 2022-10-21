@@ -53,6 +53,7 @@ class BackgroundTaskExServiceTest extends ItopDataTestCase
 
 	/**
 	 * @dataProvider ProcessOneTaskProvider
+	 *
 	 * @param $sExpectedStatus
 	 * @param $sInitialStatus
 	 * @param $sInitialAction
@@ -98,7 +99,7 @@ class BackgroundTaskExServiceTest extends ItopDataTestCase
 	public function ProcessOneTaskProvider()
 	{
 		return [
-			'no action'               => [
+			'no action'                        => [
 				'finished',
 				'created',
 				'',
@@ -106,23 +107,23 @@ class BackgroundTaskExServiceTest extends ItopDataTestCase
 				[],
 				[[]],
 			],
-			'one action finished' => [
+			'one action finished'              => [
 				'finished',
 				'created',
 				'',
-				' - Task1 init - Task1 execute',
+				' - Task1 init - Task1 execute - Deleted',
 				['Action1'],
 				[
 					[
-						'Init'       => 'Task1 init',
-						'Retry'      => 'Task1 retry',
+						'Init'        => 'Task1 init',
+						'Retry'       => 'Task1 retry',
 						'RetryReturn' => true,
-						'Execute'    => 'Task1 execute',
-						'ExecReturn' => true,
+						'Execute'     => 'Task1 execute',
+						'ExecReturn'  => true,
 					],
 				],
 			],
-			'one action paused'   => [
+			'one action paused'                => [
 				'paused',
 				'created',
 				'',
@@ -130,15 +131,15 @@ class BackgroundTaskExServiceTest extends ItopDataTestCase
 				['Action1'],
 				[
 					[
-						'Init'       => 'Task1 init',
-						'Retry'      => 'Task1 retry',
+						'Init'        => 'Task1 init',
+						'Retry'       => 'Task1 retry',
 						'RetryReturn' => true,
-						'Execute'    => 'Task1 execute',
-						'ExecReturn' => false,
+						'Execute'     => 'Task1 execute',
+						'ExecReturn'  => false,
 					],
 				],
 			],
-			'one action error'    => [
+			'one action error'                 => [
 				'running',
 				'created',
 				'',
@@ -146,43 +147,43 @@ class BackgroundTaskExServiceTest extends ItopDataTestCase
 				['Action1'],
 				[
 					[
-						'Init'       => 'Task1 init',
-						'Retry'      => 'Task1 retry',
+						'Init'        => 'Task1 init',
+						'Retry'       => 'Task1 retry',
 						'RetryReturn' => true,
-						'Execute'    => 'Task1 execute',
-						'ExecReturn' => 'Exception',
+						'Execute'     => 'Task1 execute',
+						'ExecReturn'  => 'Exception',
 					],
 				],
 			],
-			'one action continue' => [
+			'one action continue'              => [
 				'finished',
 				'paused',
 				'1',
-				' - Task1 execute',
+				' - Task1 execute - Deleted',
 				['Action1'],
 				[
 					[
-						'Init'       => 'Task1 init',
-						'Retry'      => 'Task1 retry',
+						'Init'        => 'Task1 init',
+						'Retry'       => 'Task1 retry',
 						'RetryReturn' => true,
-						'Execute'    => 'Task1 execute',
-						'ExecReturn' => true,
+						'Execute'     => 'Task1 execute',
+						'ExecReturn'  => true,
 					],
 				],
 			],
-			'one action retry on error ok' => [
+			'one action retry on error ok'     => [
 				'finished',
 				'running',
 				'1',
-				' - Task1 retry - Task1 execute',
+				' - Task1 retry - Task1 execute - Deleted',
 				['Action1'],
 				[
 					[
-						'Init'       => 'Task1 init',
-						'Retry'      => 'Task1 retry',
+						'Init'        => 'Task1 init',
+						'Retry'       => 'Task1 retry',
 						'RetryReturn' => true,
-						'Execute'    => 'Task1 execute',
-						'ExecReturn' => true,
+						'Execute'     => 'Task1 execute',
+						'ExecReturn'  => true,
 					],
 				],
 			],
@@ -194,54 +195,70 @@ class BackgroundTaskExServiceTest extends ItopDataTestCase
 				['Action1'],
 				[
 					[
-						'Init'       => 'Task1 init',
-						'Retry'      => 'Task1 retry',
+						'Init'        => 'Task1 init',
+						'Retry'       => 'Task1 retry',
 						'RetryReturn' => false,
-						'Execute'    => 'Task1 execute',
-						'ExecReturn' => true,
+						'Execute'     => 'Task1 execute',
+						'ExecReturn'  => true,
 					],
 				],
 			],
-			'one action recovering failed' => [
+			'one action recovering'     => [
 				'finished',
 				'recovering',
 				'1',
-				' - Deleted - Task1 execute',
+				' - Deleted',
 				['Action1'],
 				[
 					[
-						'Init'       => 'Task1 init',
-						'Retry'      => 'Task1 retry',
+						'Init'        => 'Task1 init',
+						'Retry'       => 'Task1 retry',
 						'RetryReturn' => true,
-						'Execute'    => 'Task1 execute',
-						'ExecReturn' => true,
+						'Execute'     => 'Task1 execute',
+						'ExecReturn'  => true,
 					],
 				],
 			],
-			'two actions finished' => [
+			'one action recovering failed'     => [
+				'recovering',
+				'running',
+				'1',
+				' - Task1 retry',
+				['Action1'],
+				[
+					[
+						'Init'        => 'Task1 init',
+						'Retry'       => 'Task1 retry',
+						'RetryReturn' => 'Exception',
+						'Execute'     => 'Task1 execute',
+						'ExecReturn'  => true,
+					],
+				],
+			],
+			'two actions finished'             => [
 				'finished',
 				'created',
 				'',
-				' - Task1 init - Task1 execute - Task2 init - Task2 execute',
+				' - Task1 init - Task1 execute - Deleted - Task2 init - Task2 execute - Deleted',
 				['Action1', 'Action2'],
 				[
 					[
-						'Init'       => 'Task1 init',
-						'Retry'      => 'Task1 retry',
+						'Init'        => 'Task1 init',
+						'Retry'       => 'Task1 retry',
 						'RetryReturn' => true,
-						'Execute'    => 'Task1 execute',
-						'ExecReturn' => true,
+						'Execute'     => 'Task1 execute',
+						'ExecReturn'  => true,
 					],
 					[
-						'Init'       => 'Task2 init',
-						'Retry'      => 'Task2 retry',
+						'Init'        => 'Task2 init',
+						'Retry'       => 'Task2 retry',
 						'RetryReturn' => true,
-						'Execute'    => 'Task2 execute',
-						'ExecReturn' => true,
+						'Execute'     => 'Task2 execute',
+						'ExecReturn'  => true,
 					],
 				],
 			],
-			'two actions, first paused' => [
+			'two actions, first paused'        => [
 				'paused',
 				'created',
 				'',
@@ -249,18 +266,18 @@ class BackgroundTaskExServiceTest extends ItopDataTestCase
 				['Action1', 'Action2'],
 				[
 					[
-						'Init'       => 'Task1 init',
-						'Retry'      => 'Task1 retry',
+						'Init'        => 'Task1 init',
+						'Retry'       => 'Task1 retry',
 						'RetryReturn' => true,
-						'Execute'    => 'Task1 execute',
-						'ExecReturn' => false,
+						'Execute'     => 'Task1 execute',
+						'ExecReturn'  => false,
 					],
 					[
-						'Init'       => 'Task2 init',
-						'Retry'      => 'Task2 retry',
+						'Init'        => 'Task2 init',
+						'Retry'       => 'Task2 retry',
 						'RetryReturn' => true,
-						'Execute'    => 'Task2 execute',
-						'ExecReturn' => true,
+						'Execute'     => 'Task2 execute',
+						'ExecReturn'  => true,
 					],
 				],
 			],

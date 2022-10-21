@@ -77,15 +77,6 @@
 					<code><![CDATA[
        public function GetNextAction()
        {
-            $sCurrentActionId = $this->Get('current_action_id');
-            if ($sCurrentActionId) {
-                // Remove current action
-                $this->Set('current_action_id', null);
-                $oAction = MetaModel::GetObject('BackgroundTaskExAction', $sCurrentActionId, false);
-                if ($oAction) {
-                    $oAction->DBDelete();
-                }
-            }
             $sId = $this->GetKey();
             $oSet = new DBObjectSet(DBSearch::FromOQL("SELECT BackgroundTaskExAction WHERE task_id=:id"), ['rank' => true], ['id' => $sId]);
             $oSet->SetLimit(1);

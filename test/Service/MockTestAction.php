@@ -57,6 +57,7 @@ class MockTestAction extends BackgroundTaskExAction
 		if (isset($this->aParams['Init'])) {
 			$sValue = $this->oTask->Get('action_params').' - '.$this->aParams['Init'];
 			$this->oTask->Set('action_params', $sValue);
+			BackgroundTaskExLog::Info("action_params: $sValue");
 		}
 	}
 
@@ -69,6 +70,7 @@ class MockTestAction extends BackgroundTaskExAction
 		if (isset($this->aParams['Retry'])) {
 			$sValue = $this->oTask->Get('action_params').' - '.$this->aParams['Retry'];
 			$this->oTask->Set('action_params', $sValue);
+			BackgroundTaskExLog::Info("action_params: $sValue");
 		}
 		$ret = $this->aParams['RetryReturn'] ?? true;
 		if (is_string($ret)) {
@@ -87,6 +89,7 @@ class MockTestAction extends BackgroundTaskExAction
 		if (isset($this->aParams['Execute'])) {
 			$sValue = $this->oTask->Get('action_params').' - '.$this->aParams['Execute'];
 			$this->oTask->Set('action_params', $sValue);
+			BackgroundTaskExLog::Info("action_params: $sValue");
 		}
 
 		$ret = $this->aParams['ExecReturn'] ?? true;
@@ -99,7 +102,9 @@ class MockTestAction extends BackgroundTaskExAction
 
 	public function DBDelete(&$oDeletionPlan = null)
 	{
+		BackgroundTaskExLog::Info('DBDelete called');
 		$sValue = $this->oTask->Get('action_params').' - Deleted';
 		$this->oTask->Set('action_params', $sValue);
+		BackgroundTaskExLog::Info("action_params: $sValue");
 	}
 }

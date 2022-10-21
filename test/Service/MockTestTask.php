@@ -13,13 +13,13 @@ class MockTestTask extends BackgroundTaskEx
 	public static function Init()
 	{
 		$aParams = [
-			'category' => '',
-			'key_type' => 'autoincrement',
-			'name_attcode' => ['name'],
-			'state_attcode' => '',
-			'reconc_keys' => [],
-			'db_table' => 'priv_complex_background_task_mock',
-			'db_key_field' => 'id',
+			'category'            => '',
+			'key_type'            => 'autoincrement',
+			'name_attcode'        => ['name'],
+			'state_attcode'       => '',
+			'reconc_keys'         => [],
+			'db_table'            => 'priv_complex_background_task_mock',
+			'db_key_field'        => 'id',
 			'db_finalclass_field' => 'finalclass',
 		];
 		MetaModel::Init_Params($aParams);
@@ -35,19 +35,26 @@ class MockTestTask extends BackgroundTaskEx
 	public function GetNextAction()
 	{
 		$iActionId = $this->Get('current_action_id');
-		BackgroundTaskExLog::Info("GetNextAction: Current action is [$iActionId]");
 		if (!$iActionId) {
 			if (isset($this->aActions[0])) {
 				$this->Set('current_action_id', 1);
+				BackgroundTaskExLog::Info("GetNextAction: Next action is [1]");
+
 				return $this->aActions[0];
 			}
+			BackgroundTaskExLog::Info('GetNextAction: No further action');
+
 			return null;
 		}
 		$iActionId++;
-		if (isset($this->aActions[$iActionId-1])) {
+		if (isset($this->aActions[$iActionId - 1])) {
+			BackgroundTaskExLog::Info("GetNextAction: Next action is [$iActionId]");
 			$this->Set('current_action_id', $iActionId);
-			return $this->aActions[$iActionId-1];
+
+			return $this->aActions[$iActionId - 1];
 		}
+		BackgroundTaskExLog::Info("GetNextAction: No further action");
+
 		return null;
 	}
 
@@ -57,7 +64,8 @@ class MockTestTask extends BackgroundTaskEx
 		if (!$iActionId) {
 			return null;
 		}
-		return $this->aActions[$iActionId-1];
+
+		return $this->aActions[$iActionId - 1];
 	}
 
 	public function DBWrite()
