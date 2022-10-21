@@ -46,6 +46,11 @@ class BackgroundTaskExService
 					$sMessage = '';
 				}
 				// Process Error tasks first
+				if (!$this->ProcessTaskList("SELECT `$sClass` WHERE status = 'recovering'", $sMessage)) {
+					return false;
+				}
+
+				// Process Error tasks first
 				if (!$this->ProcessTaskList("SELECT `$sClass` WHERE status = 'running'", $sMessage)) {
 					return false;
 				}
@@ -135,11 +140,32 @@ class BackgroundTaskExService
 							$sStatus = 'finished';
 							// try to move to the next action
 						} else {
+							// remember we try to recover from error
+							$sStatus = 'recovering';
+							$oTask->Set('status', $sStatus);
+							$oTask->DBWrite();
+							BackgroundTaskExLog::Debug("ProcessTask: status: $sStatus, action: {$oAction->Get('friendlyname')} end");
+
 							$bCanContinue = $oAction->ChangeActionParamsOnError();
 							if (!$bCanContinue) {
 								$sStatus = 'finished';
+								$oAction->DBDelete();
+								$oAction = null;
 								// try to move to the next action
 							}
+						}
+						break;
+
+					case 'recovering':
+						// recovering failed
+						$oAction = $oTask->GetCurrentAction();
+						if (is_null($oAction)) {
+							$sStatus = 'finished';
+							// try to move to the next action
+						} else {
+							// recovering is hopeless, move to the next action
+							$sStatus = 'finished';
+							$oAction->DBDelete();
 						}
 						break;
 

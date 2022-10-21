@@ -116,6 +116,7 @@ class BackgroundTaskExServiceTest extends ItopDataTestCase
 					[
 						'Init'       => 'Task1 init',
 						'Retry'      => 'Task1 retry',
+						'RetryReturn' => true,
 						'Execute'    => 'Task1 execute',
 						'ExecReturn' => true,
 					],
@@ -131,6 +132,7 @@ class BackgroundTaskExServiceTest extends ItopDataTestCase
 					[
 						'Init'       => 'Task1 init',
 						'Retry'      => 'Task1 retry',
+						'RetryReturn' => true,
 						'Execute'    => 'Task1 execute',
 						'ExecReturn' => false,
 					],
@@ -146,6 +148,7 @@ class BackgroundTaskExServiceTest extends ItopDataTestCase
 					[
 						'Init'       => 'Task1 init',
 						'Retry'      => 'Task1 retry',
+						'RetryReturn' => true,
 						'Execute'    => 'Task1 execute',
 						'ExecReturn' => 'Exception',
 					],
@@ -161,12 +164,13 @@ class BackgroundTaskExServiceTest extends ItopDataTestCase
 					[
 						'Init'       => 'Task1 init',
 						'Retry'      => 'Task1 retry',
+						'RetryReturn' => true,
 						'Execute'    => 'Task1 execute',
 						'ExecReturn' => true,
 					],
 				],
 			],
-			'one action retry on error' => [
+			'one action retry on error ok' => [
 				'finished',
 				'running',
 				'1',
@@ -176,6 +180,39 @@ class BackgroundTaskExServiceTest extends ItopDataTestCase
 					[
 						'Init'       => 'Task1 init',
 						'Retry'      => 'Task1 retry',
+						'RetryReturn' => true,
+						'Execute'    => 'Task1 execute',
+						'ExecReturn' => true,
+					],
+				],
+			],
+			'one action retry on error failed' => [
+				'finished',
+				'running',
+				'1',
+				' - Task1 retry - Deleted',
+				['Action1'],
+				[
+					[
+						'Init'       => 'Task1 init',
+						'Retry'      => 'Task1 retry',
+						'RetryReturn' => false,
+						'Execute'    => 'Task1 execute',
+						'ExecReturn' => true,
+					],
+				],
+			],
+			'one action recovering failed' => [
+				'finished',
+				'recovering',
+				'1',
+				' - Deleted - Task1 execute',
+				['Action1'],
+				[
+					[
+						'Init'       => 'Task1 init',
+						'Retry'      => 'Task1 retry',
+						'RetryReturn' => true,
 						'Execute'    => 'Task1 execute',
 						'ExecReturn' => true,
 					],
@@ -191,12 +228,14 @@ class BackgroundTaskExServiceTest extends ItopDataTestCase
 					[
 						'Init'       => 'Task1 init',
 						'Retry'      => 'Task1 retry',
+						'RetryReturn' => true,
 						'Execute'    => 'Task1 execute',
 						'ExecReturn' => true,
 					],
 					[
 						'Init'       => 'Task2 init',
 						'Retry'      => 'Task2 retry',
+						'RetryReturn' => true,
 						'Execute'    => 'Task2 execute',
 						'ExecReturn' => true,
 					],
@@ -212,12 +251,14 @@ class BackgroundTaskExServiceTest extends ItopDataTestCase
 					[
 						'Init'       => 'Task1 init',
 						'Retry'      => 'Task1 retry',
+						'RetryReturn' => true,
 						'Execute'    => 'Task1 execute',
 						'ExecReturn' => false,
 					],
 					[
 						'Init'       => 'Task2 init',
 						'Retry'      => 'Task2 retry',
+						'RetryReturn' => true,
 						'Execute'    => 'Task2 execute',
 						'ExecReturn' => true,
 					],

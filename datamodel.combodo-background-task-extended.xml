@@ -42,9 +42,12 @@
 						<value id="created">
 							<code>created</code>
 						</value>
-						<value id="running">
-							<code>running</code>
-						</value>
+            <value id="running">
+              <code>running</code>
+            </value>
+            <value id="recovering">
+              <code>recovering</code>
+            </value>
 						<value id="paused">
 							<code>paused</code>
 						</value>

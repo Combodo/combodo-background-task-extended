@@ -14,13 +14,13 @@ class MockTestAction extends BackgroundTaskExAction
 	public static function Init()
 	{
 		$aParams = [
-			'category' => '',
-			'key_type' => 'autoincrement',
-			'name_attcode' => ['name'],
-			'state_attcode' => '',
-			'reconc_keys' => [],
-			'db_table' => 'priv_complex_background_task_action_mock',
-			'db_key_field' => 'id',
+			'category'            => '',
+			'key_type'            => 'autoincrement',
+			'name_attcode'        => ['name'],
+			'state_attcode'       => '',
+			'reconc_keys'         => [],
+			'db_table'            => 'priv_complex_background_task_action_mock',
+			'db_key_field'        => 'id',
 			'db_finalclass_field' => 'finalclass',
 		];
 		MetaModel::Init_Params($aParams);
@@ -69,10 +69,13 @@ class MockTestAction extends BackgroundTaskExAction
 		if (isset($this->aParams['Retry'])) {
 			$sValue = $this->oTask->Get('action_params').' - '.$this->aParams['Retry'];
 			$this->oTask->Set('action_params', $sValue);
-			return true;
+		}
+		$ret = $this->aParams['RetryReturn'] ?? true;
+		if (is_string($ret)) {
+			throw new $ret("Test ChangeActionParamsOnError Exception: $ret");
 		}
 
-		return false;
+		return $ret;
 	}
 
 	/**
@@ -85,13 +88,18 @@ class MockTestAction extends BackgroundTaskExAction
 			$sValue = $this->oTask->Get('action_params').' - '.$this->aParams['Execute'];
 			$this->oTask->Set('action_params', $sValue);
 		}
-		if (isset($this->aParams['ExecReturn'])) {
-			if ($this->aParams['ExecReturn'] === true || $this->aParams['ExecReturn'] === false) {
-				return $this->aParams['ExecReturn'];
-			}
-			throw new $this->aParams['ExecReturn']('Test Exception');
+
+		$ret = $this->aParams['ExecReturn'] ?? true;
+		if (is_string($ret)) {
+			throw new $ret("Test ChangeActionParamsOnError Exception: $ret");
 		}
 
-		return true;
+		return $ret;
+	}
+
+	public function DBDelete(&$oDeletionPlan = null)
+	{
+		$sValue = $this->oTask->Get('action_params').' - Deleted';
+		$this->oTask->Set('action_params', $sValue);
 	}
 }
