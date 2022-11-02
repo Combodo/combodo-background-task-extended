@@ -26,6 +26,7 @@ class DatabaseService
 	{
 		BackgroundTaskExLog::Enable(APPROOT.'log/error.log');
 		$this->aSQLUpdateExtensions = null;
+		set_time_limit(0);
 	}
 
 	/**
