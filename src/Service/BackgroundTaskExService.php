@@ -45,6 +45,10 @@ class BackgroundTaskExService
 				if (is_null($sMessage)) {
 					$sMessage = '';
 				}
+				// Process Interactive tasks first
+				if (!$this->ProcessTaskList("SELECT `$sClass` WHERE status = 'interactive'", $sMessage)) {
+					return false;
+				}
 				// Process Error tasks first
 				if (!$this->ProcessTaskList("SELECT `$sClass` WHERE status = 'recovering'", $sMessage)) {
 					return false;
@@ -122,6 +126,7 @@ class BackgroundTaskExService
 		while ($bInProgress) {
 			try {
 				switch ($sStatus) {
+					case 'interactive':
 					case 'created':
 					case 'finished':
 						$oAction = $oTask->GetNextAction();

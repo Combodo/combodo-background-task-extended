@@ -45,6 +45,9 @@
             <value id="starting">
               <code>starting</code>
             </value>
+            <value id="interactive">
+              <code>interactive</code>
+            </value>
             <value id="running">
               <code>running</code>
             </value>
