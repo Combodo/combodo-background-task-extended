@@ -138,7 +138,7 @@ class BackgroundTaskExService
 							$bCanContinue = $oAction->InitActionParams();
 							if (!$bCanContinue) {
 								$sClass = get_class($oAction);
-								BackgroundTaskExLog::Info("$sClass {$oAction->Get('friendlyname')} $sStatus stopped, action deleted");
+								BackgroundTaskExLog::Info("$sClass {$oAction->Get('friendlyname')} status: $sStatus cannot continue => the action is deleted");
 								$sStatus = 'finished';
 								$oAction->DBDelete();
 								$oAction = null;
@@ -162,7 +162,7 @@ class BackgroundTaskExService
 							$bCanContinue = $oAction->ChangeActionParamsOnError();
 							if (!$bCanContinue) {
 								$sClass = get_class($oAction);
-								BackgroundTaskExLog::Info("$sClass {$oAction->Get('friendlyname')} $sStatus stopped, action deleted");
+								BackgroundTaskExLog::Info("$sClass {$oAction->Get('friendlyname')} status: $sStatus cannot continue => the action is deleted");
 								$sStatus = 'finished';
 								$oAction->DBDelete();
 								$oAction = null;
@@ -181,7 +181,7 @@ class BackgroundTaskExService
 						} else {
 							// recovering is hopeless, move to the next action
 							$sClass = get_class($oAction);
-							BackgroundTaskExLog::Error("$sClass {$oAction->Get('friendlyname')} $sStatus failed, action deleted");
+							BackgroundTaskExLog::Error("$sClass {$oAction->Get('friendlyname')} status: $sStatus failed => the action is deleted");
 							$sStatus = 'finished';
 							$oAction->DBDelete();
 							$oAction = null;
