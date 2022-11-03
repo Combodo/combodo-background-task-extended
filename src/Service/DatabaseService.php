@@ -179,7 +179,7 @@ class DatabaseService
 			BackgroundTaskExLog::Debug('COMMIT');
 			CMDBSource::Query('COMMIT');
 
-			if (count($aExtensions) > 0  /*&& $iCount > 0*/) {
+			if (count($aExtensions) > 0) {
 				$oResult = CMDBSource::Query("SELECT `$sSearchKey` FROM `$sTempTable`");
 				$aObjects = [];
 				while ($oRaw = $oResult->fetch_assoc()) {
