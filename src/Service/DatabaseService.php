@@ -87,7 +87,7 @@ class DatabaseService
 	/**
 	 * @param array $aRule
 	 * @param int $iProgress
-	 * @param int $iMaxChunkSize
+	 * @param int $iChunkSize
 	 *
 	 * @return bool
 	 * @throws \Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExException
@@ -98,7 +98,7 @@ class DatabaseService
 	 * @throws \MySQLHasGoneAwayException
 	 * @throws \OQLException
 	 */
-	public function ExecuteQueriesByChunk(array $aRule, int &$iProgress, int $iMaxChunkSize): bool
+	public function ExecuteQueriesByChunk(array $aRule, int &$iProgress, int $iChunkSize): bool
 	{
 		$sClass = $aRule['class'] ?? null;
 		$sSearchKey = $aRule['search_key'] ?? null;
@@ -111,10 +111,10 @@ class DatabaseService
 			throw new BackgroundTaskExException("Bad parameters: ".var_export($aRule, true));
 		}
 
-		$iMaxKey = $iProgress + $iMaxChunkSize;
+		$iMaxKey = $iProgress + $iChunkSize;
 		$sSqlSearch = "$sSqlSearch AND `$sSearchKey` > $iProgress AND `$sSearchKey` <= $iMaxKey";
 
-		$bCompleted = $this->ExecuteSQLQueriesByChunkWithTempTable($sClass, $sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $iMaxChunkSize);
+		$bCompleted = $this->ExecuteSQLQueriesByChunkWithTempTable($sClass, $sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $iChunkSize);
 		$bCompleted = $bCompleted || ($iMaxKey >= $iMaxProgress);
 		if ($bCompleted) {
 			$iProgress = -1;
@@ -126,7 +126,7 @@ class DatabaseService
 	}
 
 	/**
-	 * Search objects to update/delete and execute update/delete of max_chunk_size elements.
+	 * Search objects to update/delete and execute update/delete of chunk_size elements.
 	 * Manage a progress value to keep track of the progression (keep the current value of the key).
 	 * This method needs to be called repeatedly until it returns true.
 	 *
@@ -134,7 +134,7 @@ class DatabaseService
 	 * @param string $sSqlSearch SQL request to find the rows to compute (should return a list of keys)
 	 * @param array $aSqlApply array to update/delete elements found by $sSqlSearch, don't specify the where close
 	 * @param string $sKey primary key of updated table
-	 * @param int $iMaxChunkSize limit the size of processed data
+	 * @param int $iChunkSize limit the size of processed data
 	 *
 	 * @return bool true if all objects where computed, false if other objects need to be computed later
 	 *
@@ -143,7 +143,7 @@ class DatabaseService
 	 * @throws \MySQLException
 	 * @throws \MySQLHasGoneAwayException
 	 */
-	private function ExecuteSQLQueriesByChunkWithTempTable(string $sClass, string $sSearchKey, string $sSqlSearch, array $aSqlApply, string $sKey, int $iMaxChunkSize): bool
+	private function ExecuteSQLQueriesByChunkWithTempTable(string $sClass, string $sSearchKey, string $sSqlSearch, array $aSqlApply, string $sKey, int $iChunkSize): bool
 	{
 		$aExtensions = $this->GetSQLUpdateExtensions();
 
@@ -205,7 +205,7 @@ class DatabaseService
 			// Allow to retry the same set
 			BackgroundTaskExLog::Error('ROLLBACK: '.$e->getMessage());
 			CMDBSource::Query('ROLLBACK');
-			if ($iMaxChunkSize == 1) {
+			if ($iChunkSize == 1) {
 				// This is hopeless for this entry
 				throw new BackgroundTaskExException($e->getMessage());
 			}
@@ -214,7 +214,7 @@ class DatabaseService
 		catch (Exception $e) {
 			BackgroundTaskExLog::Error('ROLLBACK: '.$e->getMessage());
 			CMDBSource::Query('ROLLBACK');
-			if ($iMaxChunkSize == 1) {
+			if ($iChunkSize == 1) {
 				// Ignore current entries and skip to the next one
 				return false;
 			}
