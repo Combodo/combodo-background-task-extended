@@ -38,6 +38,14 @@ class BackgroundTaskExService
 	 */
 	public function ProcessTasks($sClass, &$sMessage): bool
 	{
+		$aStatuses = [
+			'starting',
+			'recovering',
+			'running',
+			'paused',
+			'created',
+		];
+
 		// Avoid parallelization for now
 		$oMutex = new iTopMutex('BackgroundTaskExService');
 		try {
@@ -45,27 +53,17 @@ class BackgroundTaskExService
 				if (is_null($sMessage)) {
 					$sMessage = '';
 				}
-				// Process Interactive tasks first
-				if (!$this->ProcessTaskList("SELECT `$sClass` WHERE status = 'interactive'", $sMessage)) {
-					return false;
-				}
-				// Process Error tasks first
-				if (!$this->ProcessTaskList("SELECT `$sClass` WHERE status = 'recovering'", $sMessage)) {
-					return false;
-				}
-
-				// Process Error tasks first
-				if (!$this->ProcessTaskList("SELECT `$sClass` WHERE status = 'running'", $sMessage)) {
-					return false;
-				}
-
-				// Process paused tasks
-				if (!$this->ProcessTaskList("SELECT `$sClass` WHERE status = 'paused'", $sMessage)) {
-					return false;
+				// Process tasks
+				foreach (['interactive', 'cron'] as $sType) {
+					foreach ($aStatuses as $sStatus) {
+						if (!$this->ProcessTaskList("SELECT `$sClass` WHERE `status` = '$sStatus' AND `type` = '$sType'", $sMessage)) {
+							return false;
+						}
+					}
 				}
 
 				// New tasks to process
-				return $this->ProcessTaskList("SELECT `$sClass` WHERE status = 'created'", $sMessage);
+				return true;
 			} else {
 				return false;
 			}
@@ -73,7 +71,6 @@ class BackgroundTaskExService
 		finally {
 			$oMutex->Unlock();
 		}
-
 	}
 
 	/**
@@ -99,8 +96,9 @@ class BackgroundTaskExService
 			if ($this->IsTimeoutReached()) {
 				return false;
 			}
-			if ($this->ProcessOneTask($oTask) == 'finished') {
-				$sMessage .= $oTask->Get('message');
+			$sStatus = $this->ProcessOneTask($oTask);
+			$sMessage .= $oTask->Get('message');
+			if ($sStatus == 'finished') {
 				$oTask->DBDelete();
 			} else {
 				return false;
@@ -126,7 +124,6 @@ class BackgroundTaskExService
 		while ($bInProgress) {
 			try {
 				switch ($sStatus) {
-					case 'interactive':
 					case 'created':
 					case 'finished':
 						$oAction = $oTask->GetNextAction();

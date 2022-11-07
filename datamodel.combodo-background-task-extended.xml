@@ -1,52 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <itop_design xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.7">
-	<classes>
-		<class id="BackgroundTaskEx" _delta="define">
-			<parent>DBObject</parent>
-			<properties>
-				<category/>
-				<abstract>true</abstract>
-				<db_table>priv_background_task_ex</db_table>
-				<naming>
-					<attributes>
-						<attribute id="name"/>
-					</attributes>
-				</naming>
-			</properties>
-			<fields>
-				<field id="name" xsi:type="AttributeString">
-					<sql>name</sql>
-					<default_value/>
-					<is_null_allowed>false</is_null_allowed>
-					<tracking_level>none</tracking_level>
-				</field>
-				<field id="current_action_id" xsi:type="AttributeExternalKey">
-					<sql>current_action_id</sql>
-					<target_class>BackgroundTaskExAction</target_class>
-					<is_null_allowed>true</is_null_allowed>
-					<tracking_level>none</tracking_level>
-					<on_target_delete>DEL_MANUAL</on_target_delete>
-				</field>
-				<field id="message" xsi:type="AttributeText">
-					<sql>message</sql>
-					<default_value/>
-					<is_null_allowed>true</is_null_allowed>
-					<tracking_level>none</tracking_level>
-				</field>
-				<field id="status" xsi:type="AttributeEnum">
-					<sql>status</sql>
-					<is_null_allowed>false</is_null_allowed>
-					<default_value>created</default_value>
-					<tracking_level>none</tracking_level>
-					<values>
+  <classes>
+    <class id="BackgroundTaskEx" _delta="define">
+      <parent>DBObject</parent>
+      <properties>
+        <category/>
+        <abstract>true</abstract>
+        <db_table>priv_background_task_ex</db_table>
+        <naming>
+          <attributes>
+            <attribute id="name"/>
+          </attributes>
+        </naming>
+      </properties>
+      <fields>
+        <field id="name" xsi:type="AttributeString">
+          <sql>name</sql>
+          <default_value/>
+          <is_null_allowed>false</is_null_allowed>
+          <tracking_level>none</tracking_level>
+        </field>
+        <field id="current_action_id" xsi:type="AttributeExternalKey">
+          <sql>current_action_id</sql>
+          <target_class>BackgroundTaskExAction</target_class>
+          <is_null_allowed>true</is_null_allowed>
+          <tracking_level>none</tracking_level>
+          <on_target_delete>DEL_MANUAL</on_target_delete>
+        </field>
+        <field id="message" xsi:type="AttributeText">
+          <sql>message</sql>
+          <default_value/>
+          <is_null_allowed>true</is_null_allowed>
+          <tracking_level>none</tracking_level>
+        </field>
+        <field id="status" xsi:type="AttributeEnum">
+          <sql>status</sql>
+          <is_null_allowed>false</is_null_allowed>
+          <default_value>created</default_value>
+          <tracking_level>none</tracking_level>
+          <values>
             <value id="created">
               <code>created</code>
             </value>
             <value id="starting">
               <code>starting</code>
-            </value>
-            <value id="interactive">
-              <code>interactive</code>
             </value>
             <value id="running">
               <code>running</code>
@@ -54,18 +51,32 @@
             <value id="recovering">
               <code>recovering</code>
             </value>
-						<value id="paused">
-							<code>paused</code>
-						</value>
-					</values>
-				</field>
-			</fields>
-			<methods>
-				<method id="GetCurrentAction">
-					<static>false</static>
-					<access>public</access>
-					<type>Overload-ExNihilo</type>
-					<code><![CDATA[
+            <value id="paused">
+              <code>paused</code>
+            </value>
+          </values>
+        </field>
+        <field id="type" xsi:type="AttributeEnum">
+          <sql>type</sql>
+          <is_null_allowed>false</is_null_allowed>
+          <default_value>cron</default_value>
+          <tracking_level>none</tracking_level>
+          <values>
+            <value id="cron">
+              <code>cron</code>
+            </value>
+            <value id="interactive">
+              <code>interactive</code>
+            </value>
+          </values>
+        </field>
+      </fields>
+      <methods>
+        <method id="GetCurrentAction">
+          <static>false</static>
+          <access>public</access>
+          <type>Overload-ExNihilo</type>
+          <code><![CDATA[
        public function GetCurrentAction()
        {
             $sCurrentActionId = $this->Get('current_action_id');
@@ -75,12 +86,12 @@
             return null;
        }
 ]]></code>
-				</method>
-				<method id="GetNextAction">
-					<static>false</static>
-					<access>public</access>
-					<type>Overload-ExNihilo</type>
-					<code><![CDATA[
+        </method>
+        <method id="GetNextAction">
+          <static>false</static>
+          <access>public</access>
+          <type>Overload-ExNihilo</type>
+          <code><![CDATA[
        public function GetNextAction()
        {
             $sId = $this->GetKey();
@@ -93,200 +104,200 @@
             return $oAction;
        }
 ]]></code>
-				</method>
-			</methods>
-			<presentation>
-				<list>
-					<items>
-						<item id="name">
-							<rank>10</rank>
-						</item>
-						<item id="status">
-							<rank>60</rank>
-						</item>
-					</items>
-				</list>
-			</presentation>
-		</class>
-		<class id="BackgroundTaskExAction" _delta="define">
-			<parent>DBObject</parent>
-			<php_parent>
-				<name>AbstractBackgroundTaskExAction</name>
-			</php_parent>
-			<properties>
-				<category/>
-				<abstract>true</abstract>
-				<db_table>priv_background_task_ex_action</db_table>
-				<naming>
-					<attributes>
-						<attribute id="name"/>
-					</attributes>
-				</naming>
-			</properties>
-			<fields>
-				<field id="name" xsi:type="AttributeString">
-					<sql>name</sql>
-					<default_value/>
-					<is_null_allowed>false</is_null_allowed>
-					<tracking_level>none</tracking_level>
-				</field>
-				<field id="rank" xsi:type="AttributeInteger">
-					<sql>rank</sql>
-					<default_value>1</default_value>
-					<is_null_allowed>false</is_null_allowed>
-					<tracking_level>none</tracking_level>
-				</field>
-				<field id="task_id" xsi:type="AttributeExternalKey">
-					<sql>task_id</sql>
-					<target_class>BackgroundTaskEx</target_class>
-					<is_null_allowed>false</is_null_allowed>
-					<tracking_level>none</tracking_level>
-					<on_target_delete>DEL_AUTO</on_target_delete>
-				</field>
-			</fields>
-			<methods>
-				<method id="InitActionParams">
-					<static>false</static>
-					<access>public</access>
-					<type>Overload-ExNihilo</type>
-					<comment>
-						/**
-						* Initialize the action and save specific data
+        </method>
+      </methods>
+      <presentation>
+        <list>
+          <items>
+            <item id="name">
+              <rank>10</rank>
+            </item>
+            <item id="status">
+              <rank>60</rank>
+            </item>
+          </items>
+        </list>
+      </presentation>
+    </class>
+    <class id="BackgroundTaskExAction" _delta="define">
+      <parent>DBObject</parent>
+      <php_parent>
+        <name>AbstractBackgroundTaskExAction</name>
+      </php_parent>
+      <properties>
+        <category/>
+        <abstract>true</abstract>
+        <db_table>priv_background_task_ex_action</db_table>
+        <naming>
+          <attributes>
+            <attribute id="name"/>
+          </attributes>
+        </naming>
+      </properties>
+      <fields>
+        <field id="name" xsi:type="AttributeString">
+          <sql>name</sql>
+          <default_value/>
+          <is_null_allowed>false</is_null_allowed>
+          <tracking_level>none</tracking_level>
+        </field>
+        <field id="rank" xsi:type="AttributeInteger">
+          <sql>rank</sql>
+          <default_value>1</default_value>
+          <is_null_allowed>false</is_null_allowed>
+          <tracking_level>none</tracking_level>
+        </field>
+        <field id="task_id" xsi:type="AttributeExternalKey">
+          <sql>task_id</sql>
+          <target_class>BackgroundTaskEx</target_class>
+          <is_null_allowed>false</is_null_allowed>
+          <tracking_level>none</tracking_level>
+          <on_target_delete>DEL_AUTO</on_target_delete>
+        </field>
+      </fields>
+      <methods>
+        <method id="InitActionParams">
+          <static>false</static>
+          <access>public</access>
+          <type>Overload-ExNihilo</type>
+          <comment>
+            /**
+            * Initialize the action and save specific data
             * @return bool true if action can continue
-						*/
-					</comment>
-					<code><![CDATA[
+            */
+          </comment>
+          <code><![CDATA[
        public function InitActionParams(): bool
        {
        					return true;
        }
 ]]></code>
-				</method>
-				<method id="ChangeActionParamsOnError">
-					<static>false</static>
-					<access>public</access>
-					<type>Overload-ExNihilo</type>
-					<comment>
-						/**
-						* Change the specific data to retry the action on error
-						* @return bool true if action can continue
-						*/
-					</comment>
-					<code><![CDATA[
+        </method>
+        <method id="ChangeActionParamsOnError">
+          <static>false</static>
+          <access>public</access>
+          <type>Overload-ExNihilo</type>
+          <comment>
+            /**
+            * Change the specific data to retry the action on error
+            * @return bool true if action can continue
+            */
+          </comment>
+          <code><![CDATA[
        public function ChangeActionParamsOnError(): bool
        {
 					return true;
        }
 ]]></code>
-				</method>
-				<method id="ExecuteAction">
-					<static>false</static>
-					<access>public</access>
-					<type>Overload-ExNihilo</type>
-					<comment>
-						/**
-						* Execute the action using the specific data
-						* When execution stops after execution timeout, store the parameters for the next execution in the $oTask object.
-						*
-						* @param int iEndExecutionTime Unix timestamp of the end of execution
-						* @return bool true when action is finished, false if paused on execution timeout
-						*/
-					</comment>
-					<code><![CDATA[
+        </method>
+        <method id="ExecuteAction">
+          <static>false</static>
+          <access>public</access>
+          <type>Overload-ExNihilo</type>
+          <comment>
+            /**
+            * Execute the action using the specific data
+            * When execution stops after execution timeout, store the parameters for the next execution in the $oTask object.
+            *
+            * @param int iEndExecutionTime Unix timestamp of the end of execution
+            * @return bool true when action is finished, false if paused on execution timeout
+            */
+          </comment>
+          <code><![CDATA[
        public function ExecuteAction($iEndExecutionTime)
        {
             return true;
        }
 ]]></code>
-				</method>
-			</methods>
-			<presentation>
-				<list>
-					<items>
-						<item id="name">
-							<rank>10</rank>
-						</item>
-						<item id="rank">
-							<rank>60</rank>
-						</item>
-					</items>
-				</list>
-			</presentation>
-		</class>
-		<class id="DatabaseProcessRule" _delta="define">
-			<parent>cmdbAbstractObject</parent>
-			<properties>
-				<category>bizmodel,searchable</category>
-				<abstract>true</abstract>
-				<db_table>database_process_rule</db_table>
-				<naming>
-					<attributes>
-						<attribute id="name"/>
-					</attributes>
-				</naming>
-				<reconciliation>
-					<attributes>
-						<attribute id="target_class"/>
-					</attributes>
-				</reconciliation>
-			</properties>
-			<fields>
-				<field id="target_class" xsi:type="AttributeString">
-					<sql>target_class</sql>
-					<default_value/>
-					<is_null_allowed>false</is_null_allowed>
-				</field>
-				<field id="name" xsi:type="AttributeString">
-					<sql>name</sql>
-					<default_value/>
-					<is_null_allowed>false</is_null_allowed>
-				</field>
-				<field id="status" xsi:type="AttributeEnum">
-					<values>
-						<value id="active">active</value>
-						<value id="inactive">inactive</value>
-					</values>
-					<sql>status</sql>
-					<default_value>active</default_value>
-					<is_null_allowed>false</is_null_allowed>
-					<display_style>list</display_style>
-				</field>
-				<field id="type" xsi:type="AttributeEnum">
-					<values>
-						<value id="simple">simple</value>
-						<value id="advanced">advanced</value>
-					</values>
-					<dependencies>
-						<attribute id="date_to_check_att"/>
-						<attribute id="retention_delay"/>
-						<attribute id="oql_scope"/>
-					</dependencies>
-					<sql>type</sql>
-					<default_value>simple</default_value>
-					<is_null_allowed>false</is_null_allowed>
-				</field>
-				<field id="date_to_check_att" xsi:type="AttributeString">
-					<sql>date_to_check_att</sql>
-					<default_value/>
-					<is_null_allowed>true</is_null_allowed>
-				</field>
-				<field id="retention_delay" xsi:type="AttributeInteger">
-					<sql>retention_delay</sql>
-					<default_value/>
-					<is_null_allowed>true</is_null_allowed>
-				</field>
-				<field id="oql_scope" xsi:type="AttributeOQL">
-					<sql>oql_scope</sql>
-					<default_value/>
-					<is_null_allowed>true</is_null_allowed>
-				</field>
-			</fields>
-			<methods>
-				<method id="GetInitialStateAttributeFlags">
-					<static>false</static>
-					<access>public</access>
-					<type>Overload-DBObject</type>
-					<code><![CDATA[	public function GetInitialStateAttributeFlags($sAttCode, &$aReasons = array())
+        </method>
+      </methods>
+      <presentation>
+        <list>
+          <items>
+            <item id="name">
+              <rank>10</rank>
+            </item>
+            <item id="rank">
+              <rank>60</rank>
+            </item>
+          </items>
+        </list>
+      </presentation>
+    </class>
+    <class id="DatabaseProcessRule" _delta="define">
+      <parent>cmdbAbstractObject</parent>
+      <properties>
+        <category>bizmodel,searchable</category>
+        <abstract>true</abstract>
+        <db_table>database_process_rule</db_table>
+        <naming>
+          <attributes>
+            <attribute id="name"/>
+          </attributes>
+        </naming>
+        <reconciliation>
+          <attributes>
+            <attribute id="target_class"/>
+          </attributes>
+        </reconciliation>
+      </properties>
+      <fields>
+        <field id="target_class" xsi:type="AttributeString">
+          <sql>target_class</sql>
+          <default_value/>
+          <is_null_allowed>false</is_null_allowed>
+        </field>
+        <field id="name" xsi:type="AttributeString">
+          <sql>name</sql>
+          <default_value/>
+          <is_null_allowed>false</is_null_allowed>
+        </field>
+        <field id="status" xsi:type="AttributeEnum">
+          <values>
+            <value id="active">active</value>
+            <value id="inactive">inactive</value>
+          </values>
+          <sql>status</sql>
+          <default_value>active</default_value>
+          <is_null_allowed>false</is_null_allowed>
+          <display_style>list</display_style>
+        </field>
+        <field id="type" xsi:type="AttributeEnum">
+          <values>
+            <value id="simple">simple</value>
+            <value id="advanced">advanced</value>
+          </values>
+          <dependencies>
+            <attribute id="date_to_check_att"/>
+            <attribute id="retention_delay"/>
+            <attribute id="oql_scope"/>
+          </dependencies>
+          <sql>type</sql>
+          <default_value>simple</default_value>
+          <is_null_allowed>false</is_null_allowed>
+        </field>
+        <field id="date_to_check_att" xsi:type="AttributeString">
+          <sql>date_to_check_att</sql>
+          <default_value/>
+          <is_null_allowed>true</is_null_allowed>
+        </field>
+        <field id="retention_delay" xsi:type="AttributeInteger">
+          <sql>retention_delay</sql>
+          <default_value/>
+          <is_null_allowed>true</is_null_allowed>
+        </field>
+        <field id="oql_scope" xsi:type="AttributeOQL">
+          <sql>oql_scope</sql>
+          <default_value/>
+          <is_null_allowed>true</is_null_allowed>
+        </field>
+      </fields>
+      <methods>
+        <method id="GetInitialStateAttributeFlags">
+          <static>false</static>
+          <access>public</access>
+          <type>Overload-DBObject</type>
+          <code><![CDATA[	public function GetInitialStateAttributeFlags($sAttCode, &$aReasons = array())
 	{
 		if ($sAttCode == 'type') {
 		    return OPT_ATT_READONLY;
@@ -294,12 +305,12 @@
 		return parent::GetInitialStateAttributeFlags($sAttCode, $aReasons);
 	}
 ]]></code>
-				</method>
-				<method id="GetAttributeFlags">
-					<static>false</static>
-					<access>public</access>
-					<type>Overload-DBObject</type>
-					<code><![CDATA[	public function GetAttributeFlags($sAttCode, &$aReasons = array(), $sTargetState = '')
+        </method>
+        <method id="GetAttributeFlags">
+          <static>false</static>
+          <access>public</access>
+          <type>Overload-DBObject</type>
+          <code><![CDATA[	public function GetAttributeFlags($sAttCode, &$aReasons = array(), $sTargetState = '')
 	{
 		if ($sAttCode == 'type') {
 		    return OPT_ATT_READONLY;
@@ -307,12 +318,12 @@
 		return parent::GetAttributeFlags($sAttCode, $aReasons, $sTargetState);
 	}
 ]]></code>
-				</method>
-				<method id="ComputeValues">
-					<static>false</static>
-					<access>public</access>
-					<type>Overload-DBObject</type>
-					<code><![CDATA[	public function ComputeValues()
+        </method>
+        <method id="ComputeValues">
+          <static>false</static>
+          <access>public</access>
+          <type>Overload-DBObject</type>
+          <code><![CDATA[	public function ComputeValues()
 	{
 		// Compute the type of the rule
 		$oScopeAttDef = MetaModel::GetAttributeDef(get_class($this), 'oql_scope');
@@ -321,11 +332,11 @@
 
 		return parent::ComputeValues();
 	}]]></code>
-				</method>
-				<method id="DoCheckToWrite">
-					<static>false</static>
-					<access>public </access>
-					<code><![CDATA[    	public function DoCheckToWrite()
+        </method>
+        <method id="DoCheckToWrite">
+          <static>false</static>
+          <access>public</access>
+          <code><![CDATA[    	public function DoCheckToWrite()
 	{
 		parent::DoCheckToWrite();
 
@@ -399,12 +410,12 @@
 		}
 	}
 ]]></code>
-				</method>
-				<method id="GetFilter">
-					<static>false</static>
-					<access>public</access>
-					<type>Overload-DBObject</type>
-					<code><![CDATA[		/**
+        </method>
+        <method id="GetFilter">
+          <static>false</static>
+          <access>public</access>
+          <type>Overload-DBObject</type>
+          <code><![CDATA[		/**
 	 * @return DBObjectSearch
 	 * @throws \OQLException
 	 */
@@ -428,12 +439,12 @@
 		return $oSearch;
 	}
 ]]></code>
-				</method>
-				<method id="DisplayBareRelations">
-					<static>false</static>
-					<access>public</access>
-					<type>Overload-DBObject</type>
-					<code><![CDATA[		/**
+        </method>
+        <method id="DisplayBareRelations">
+          <static>false</static>
+          <access>public</access>
+          <type>Overload-DBObject</type>
+          <code><![CDATA[		/**
 	 * @param \WebPage $oPage
 	 * @param bool $bEditMode
 	 */
@@ -446,12 +457,12 @@
 			$this->OnShowPreview($oPage);
 		}
 	}]]></code>
-				</method>
-				<method id="OnShowPreview">
-					<static>false</static>
-					<access>protected</access>
-					<type>Overload-DBObject</type>
-					<code><![CDATA[	/**
+        </method>
+        <method id="OnShowPreview">
+          <static>false</static>
+          <access>protected</access>
+          <type>Overload-DBObject</type>
+          <code><![CDATA[	/**
 	 * @param \WebPage $oPage
 	 *
 	 * @throws \ArchivedObjectException
@@ -477,126 +488,126 @@
 		$oBlock = new DisplayBlock($this->GetFilter(), 'list', true, $aParams);
 		$oBlock->Display($oPage, 'rel_preview_rule_'.$this->GetKey(), $aParams);
 	}]]></code>
-				</method>
-				<method id="OnExecution ">
-					<static>true</static>
-					<access>protected</access>
-					<type>Overload-DBObject</type>
-					<code><![CDATA[/**
+        </method>
+        <method id="OnExecution ">
+          <static>true</static>
+          <access>protected</access>
+          <type>Overload-DBObject</type>
+          <code><![CDATA[/**
 	 * @param \WebPage $oPage
 	 */
 	public static function OnExecution ( $aIds)
 	{
 		//Default do nothing
 	}]]></code>
-				</method>
-			</methods>
-			<presentation>
-				<list>
-					<items>
-						<item id="target_class">
-							<rank>10</rank>
-						</item>
-						<item id="name">
-							<rank>20</rank>
-						</item>
-						<item id="status">
-							<rank>30</rank>
-						</item>
-						<item id="type">
-							<rank>40</rank>
-						</item>
-					</items>
-				</list>
-				<search>
-					<items>
-						<item id="name">
-							<rank>10</rank>
-						</item>
-						<item id="target_class">
-							<rank>20</rank>
-						</item>
-						<item id="status">
-							<rank>30</rank>
-						</item>
-						<item id="type">
-							<rank>40</rank>
-						</item>
-						<item id="date_to_check_att">
-							<rank>70</rank>
-						</item>
-						<item id="retention_delay">
-							<rank>80</rank>
-						</item>
-						<item id="oql_scope">
-							<rank>90</rank>
-						</item>
-					</items>
-				</search>
-				<details>
-					<items>
-						<item id="col:col0">
-							<rank>10</rank>
-							<items>
-								<item id="fieldset:DatabaseProcessRule:general">
-									<rank>10</rank>
-									<items>
-										<item id="name">
-											<rank>10</rank>
-										</item>
-										<item id="target_class">
-											<rank>20</rank>
-										</item>
-										<item id="status">
-											<rank>30</rank>
-										</item>
-										<item id="type">
-											<rank>40</rank>
-										</item>
-									</items>
-								</item>
-							</items>
-						</item>
-						<item id="col:col1">
-							<rank>20</rank>
-							<items>
-								<item id="fieldset:DatabaseProcessRule:simple">
-									<rank>10</rank>
-									<items>
-										<item id="date_to_check_att">
-											<rank>30</rank>
-										</item>
-										<item id="retention_delay">
-											<rank>40</rank>
-										</item>
-									</items>
-								</item>
-							</items>
-						</item>
-						<item id="col:col2">
-							<rank>30</rank>
-							<items>
-								<item id="fieldset:DatabaseProcessRule:advanced">
-									<rank>100</rank>
-									<items>
-										<item id="oql_scope">
-											<rank>10</rank>
-										</item>
-									</items>
-								</item>
-							</items>
-						</item>
-					</items>
-				</details>
-			</presentation>
-		</class>
-	</classes>
-	<module_parameters>
-		<parameters id="combodo-complex-background-task" _delta="define">
-			<time>01:00</time>
-			<end_time>23:30</end_time>
-			<max_execution_time>30</max_execution_time>
-			<week_days>sunday</week_days>
-		</parameters>
-	</module_parameters>
+        </method>
+      </methods>
+      <presentation>
+        <list>
+          <items>
+            <item id="target_class">
+              <rank>10</rank>
+            </item>
+            <item id="name">
+              <rank>20</rank>
+            </item>
+            <item id="status">
+              <rank>30</rank>
+            </item>
+            <item id="type">
+              <rank>40</rank>
+            </item>
+          </items>
+        </list>
+        <search>
+          <items>
+            <item id="name">
+              <rank>10</rank>
+            </item>
+            <item id="target_class">
+              <rank>20</rank>
+            </item>
+            <item id="status">
+              <rank>30</rank>
+            </item>
+            <item id="type">
+              <rank>40</rank>
+            </item>
+            <item id="date_to_check_att">
+              <rank>70</rank>
+            </item>
+            <item id="retention_delay">
+              <rank>80</rank>
+            </item>
+            <item id="oql_scope">
+              <rank>90</rank>
+            </item>
+          </items>
+        </search>
+        <details>
+          <items>
+            <item id="col:col0">
+              <rank>10</rank>
+              <items>
+                <item id="fieldset:DatabaseProcessRule:general">
+                  <rank>10</rank>
+                  <items>
+                    <item id="name">
+                      <rank>10</rank>
+                    </item>
+                    <item id="target_class">
+                      <rank>20</rank>
+                    </item>
+                    <item id="status">
+                      <rank>30</rank>
+                    </item>
+                    <item id="type">
+                      <rank>40</rank>
+                    </item>
+                  </items>
+                </item>
+              </items>
+            </item>
+            <item id="col:col1">
+              <rank>20</rank>
+              <items>
+                <item id="fieldset:DatabaseProcessRule:simple">
+                  <rank>10</rank>
+                  <items>
+                    <item id="date_to_check_att">
+                      <rank>30</rank>
+                    </item>
+                    <item id="retention_delay">
+                      <rank>40</rank>
+                    </item>
+                  </items>
+                </item>
+              </items>
+            </item>
+            <item id="col:col2">
+              <rank>30</rank>
+              <items>
+                <item id="fieldset:DatabaseProcessRule:advanced">
+                  <rank>100</rank>
+                  <items>
+                    <item id="oql_scope">
+                      <rank>10</rank>
+                    </item>
+                  </items>
+                </item>
+              </items>
+            </item>
+          </items>
+        </details>
+      </presentation>
+    </class>
+  </classes>
+  <module_parameters>
+    <parameters id="combodo-complex-background-task" _delta="define">
+      <time>01:00</time>
+      <end_time>23:30</end_time>
+      <max_execution_time>30</max_execution_time>
+      <week_days>sunday</week_days>
+    </parameters>
+  </module_parameters>
 </itop_design>
