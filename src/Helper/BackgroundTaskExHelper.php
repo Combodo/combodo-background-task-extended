@@ -13,6 +13,8 @@ class BackgroundTaskExHelper
 
 
 	/**
+	 * to be removed when minimum compat is 3.0.0
+	 *
 	 * @param string $sInterface
 	 * @param string $sClassNameFilter
 	 *
@@ -35,7 +37,7 @@ class BackgroundTaskExHelper
 
 		if (empty($aMatchingClasses)) {
 			$aAutoloadClassMaps = [APPROOT.'lib/composer/autoload_classmap.php'];
-			// guess all the autoload class maps from the extensions
+			// guess all autoload class maps from the extensions
 			$aAutoloadClassMaps = array_merge($aAutoloadClassMaps, glob(APPROOT.'env-'.utils::GetCurrentEnvironment().'/*/vendor/composer/autoload_classmap.php'));
 
 			$aClassMap = [];
@@ -51,15 +53,20 @@ class BackgroundTaskExHelper
 			foreach ($aClassMap as $sPHPClass => $sPHPFile) {
 				$bSkipped = false;
 
-				// Check if our class matches name filter, or is in an excluded path
-				if ($sClassNameFilter !== '' && strpos($sPHPClass, $sClassNameFilter) === false) {
+				if (!class_exists($sPHPClass)) {
+					// we can get non-existing classes from autoload files
 					$bSkipped = true;
 				} else {
-					foreach ($aExcludedPath as $sExcludedPath) {
-						// Note: We use '#' as delimiters as usual '/' is often used in paths.
-						if ($sExcludedPath !== '' && preg_match('#'.$sExcludedPath.'#', $sPHPFile) === 1) {
-							$bSkipped = true;
-							break;
+					// Check if our class matches name filter, or is in an excluded path
+					if ($sClassNameFilter !== '' && strpos($sPHPClass, $sClassNameFilter) === false) {
+						$bSkipped = true;
+					} else {
+						foreach ($aExcludedPath as $sExcludedPath) {
+							// Note: We use '#' as delimiters as usual '/' is often used in paths.
+							if ($sExcludedPath !== '' && preg_match('#'.$sExcludedPath.'#', $sPHPFile) === 1) {
+								$bSkipped = true;
+								break;
+							}
 						}
 					}
 				}

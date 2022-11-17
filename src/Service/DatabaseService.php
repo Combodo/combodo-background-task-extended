@@ -120,10 +120,11 @@ class DatabaseService
 		$iMaxKey = $iProgress + $iChunkSize;
 		if ($iProgress >= $iMaxProgress) {
 			$iProgress = -1;
+
 			return true;
 		}
 
-		if ($iMaxProgress < $iMaxKey){
+		if ($iMaxProgress < $iMaxKey) {
 			$iMaxKey = $iMaxProgress;
 		}
 
