@@ -53,20 +53,15 @@ class BackgroundTaskExHelper
 			foreach ($aClassMap as $sPHPClass => $sPHPFile) {
 				$bSkipped = false;
 
-				if (!class_exists($sPHPClass)) {
-					// we can get non-existing classes from autoload files
+				// Check if our class matches name filter, or is in an excluded path
+				if ($sClassNameFilter !== '' && strpos($sPHPClass, $sClassNameFilter) === false) {
 					$bSkipped = true;
 				} else {
-					// Check if our class matches name filter, or is in an excluded path
-					if ($sClassNameFilter !== '' && strpos($sPHPClass, $sClassNameFilter) === false) {
-						$bSkipped = true;
-					} else {
-						foreach ($aExcludedPath as $sExcludedPath) {
-							// Note: We use '#' as delimiters as usual '/' is often used in paths.
-							if ($sExcludedPath !== '' && preg_match('#'.$sExcludedPath.'#', $sPHPFile) === 1) {
-								$bSkipped = true;
-								break;
-							}
+					foreach ($aExcludedPath as $sExcludedPath) {
+						// Note: We use '#' as delimiters as usual '/' is often used in paths.
+						if ($sExcludedPath !== '' && preg_match('#'.$sExcludedPath.'#', $sPHPFile) === 1) {
+							$bSkipped = true;
+							break;
 						}
 					}
 				}
