@@ -106,16 +106,25 @@ class DatabaseService
 		$aSqlApply = $aRule['apply_queries'] ?? null;
 		$sKey = $aRule['key'] ?? null;
 		$iMaxProgress = $aRule['search_max_id'] ?? null;
+		$iMinProgress = $aRule['search_min_id'] ?? null;
 
-		if (is_null($sClass) || is_null($sSearchKey) || is_null($iMaxProgress) || !is_array($aSqlApply) || is_null($sKey) || is_null($sSqlSearch)) {
+		if (is_null($sClass) || is_null($sSearchKey) || !is_array($aSqlApply) || is_null($sKey) || is_null($sSqlSearch)) {
 			throw new BackgroundTaskExException("Bad parameters: ".var_export($aRule, true));
 		}
 
+		if (! is_null($iMinProgress) && $iProgress < $iMinProgress){
+			//first time only
+			$iProgress = $iMinProgress;
+		}
+
 		$iMaxKey = $iProgress + $iChunkSize;
+		if (! is_null($iMaxProgress) && $iMaxKey > $iMaxProgress){
+			$iMaxKey = $iMaxProgress;
+		}
+
 		$sSqlSearch = "$sSqlSearch AND `$sSearchKey` > $iProgress AND `$sSearchKey` <= $iMaxKey";
 
 		$bCompleted = $this->ExecuteSQLQueriesByChunkWithTempTable($sClass, $sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $iChunkSize);
-		$bCompleted = $bCompleted || ($iMaxKey >= $iMaxProgress);
 		if ($bCompleted) {
 			$iProgress = -1;
 		} else {
@@ -298,6 +307,16 @@ class DatabaseService
 		$oRes = CMDBSource::Query("SELECT COALESCE(MAX(`$sKey`), 0) FROM `$sTable`");
 		$aRow = $oRes->fetch_array(MYSQLI_NUM);
 		$this->DebugDuration($fStart, "Query max $sKey for $sTable: $aRow[0]");
+
+		return $aRow[0];
+	}
+
+	public function QueryMinKey($sKey, $sTable)
+	{
+		$fStart = microtime(true);
+		$oRes = CMDBSource::Query("SELECT COALESCE(MIN(`$sKey`), 0) FROM `$sTable`");
+		$aRow = $oRes->fetch_array(MYSQLI_NUM);
+		$this->DebugDuration($fStart, "Query min $sKey for $sTable: $aRow[0]");
 
 		return $aRow[0];
 	}
