@@ -126,6 +126,7 @@ class BackgroundTaskExService
 				switch ($sStatus) {
 					case 'created':
 					case 'finished':
+						// Currently no action is selected
 						$oAction = $oTask->GetNextAction();
 						if (is_null($oAction)) {
 							$sStatus = 'finished';
@@ -135,12 +136,11 @@ class BackgroundTaskExService
 							$sStatus = 'starting';
 							$oTask->Set('status', $sStatus);
 							$oTask->DBWrite();
-							BackgroundTaskExLog::Debug("ProcessTask: status: $sStatus, action: {$oAction->Get('friendlyname')} end");
+							BackgroundTaskExLog::Debug("ProcessTask: action: {$oAction->Get('friendlyname')} starting");
 
 							$bCanContinue = $oAction->InitActionParams();
 							if (!$bCanContinue) {
-								$sClass = get_class($oAction);
-								BackgroundTaskExLog::Info("$sClass {$oAction->Get('friendlyname')} status: $sStatus cannot continue => the action is deleted");
+								BackgroundTaskExLog::Info("ProcessTask: action: {$oAction->Get('friendlyname')} status: $sStatus cannot continue => the action is deleted");
 								$sStatus = 'finished';
 								$oAction->DBDelete();
 								$oAction = null;
@@ -150,6 +150,7 @@ class BackgroundTaskExService
 						break;
 
 					case 'running':
+						// Arriving in "running" status means that ExecuteAction() failed brutally
 						$oAction = $oTask->GetCurrentAction();
 						if (is_null($oAction)) {
 							$sStatus = 'finished';
@@ -159,12 +160,11 @@ class BackgroundTaskExService
 							$sStatus = 'recovering';
 							$oTask->Set('status', $sStatus);
 							$oTask->DBWrite();
-							BackgroundTaskExLog::Debug("ProcessTask: status: $sStatus, action: {$oAction->Get('friendlyname')} try restarting");
+							BackgroundTaskExLog::Debug("ProcessTask: action: {$oAction->Get('friendlyname')} try recovering from previous error");
 
 							$bCanContinue = $oAction->ChangeActionParamsOnError();
 							if (!$bCanContinue) {
-								$sClass = get_class($oAction);
-								BackgroundTaskExLog::Info("$sClass {$oAction->Get('friendlyname')} status: $sStatus cannot continue => the action is deleted");
+								BackgroundTaskExLog::Info("ProcessTask: action: {$oAction->Get('friendlyname')} recovering failed => the action is deleted");
 								$sStatus = 'finished';
 								$oAction->DBDelete();
 								$oAction = null;
@@ -174,16 +174,16 @@ class BackgroundTaskExService
 						break;
 
 					case 'starting':
+						// InitActionParams() failed brutally
 					case 'recovering':
-						// recovering failed
+						// ChangeActionParamsOnError() failed brutally
 						$oAction = $oTask->GetCurrentAction();
 						if (is_null($oAction)) {
 							$sStatus = 'finished';
 							// try to move to the next action
 						} else {
 							// recovering is hopeless, move to the next action
-							$sClass = get_class($oAction);
-							BackgroundTaskExLog::Error("$sClass {$oAction->Get('friendlyname')} status: $sStatus failed => the action is deleted");
+							BackgroundTaskExLog::Error("ProcessTask: action: {$oAction->Get('friendlyname')} $sStatus failed brutally => the action is deleted");
 							$sStatus = 'finished';
 							$oAction->DBDelete();
 							$oAction = null;
@@ -191,6 +191,7 @@ class BackgroundTaskExService
 						break;
 
 					case 'paused':
+						// The previous execution stopped normally on timeout, just continue
 						$oAction = $oTask->GetCurrentAction();
 						if (is_null($oAction)) {
 							$sStatus = 'finished';
@@ -201,7 +202,7 @@ class BackgroundTaskExService
 
 				if ($bInProgress && !is_null($oAction)) {
 					$sAction = $oAction->Get('friendlyname');
-					BackgroundTaskExLog::Debug("ProcessTask: status: $sStatus, action: $sAction begin");
+					BackgroundTaskExLog::Debug("ProcessTask: action: $sAction running");
 					$sStatus = 'running';
 					$oTask->Set('status', $sStatus);
 					$oTask->DBWrite();
@@ -217,7 +218,7 @@ class BackgroundTaskExService
 						$oTask->DBWrite();
 						$bInProgress = false;
 					}
-					BackgroundTaskExLog::Debug("ProcessTask: status: $sStatus, action: $sAction end");
+					BackgroundTaskExLog::Debug("ProcessTask: action: $sAction status: $sStatus, end");
 				}
 			}
 			catch (Exception $e) {
