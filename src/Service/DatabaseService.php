@@ -108,7 +108,7 @@ class DatabaseService
 		$iMaxProgress = $aRule['search_max_id'] ?? null;
 		$iMinProgress = $aRule['search_min_id'] ?? null;
 
-		if (is_null($sClass) || is_null($sSearchKey) || !is_array($aSqlApply) || is_null($sKey) || is_null($sSqlSearch) || is_null($iMaxProgress)) {
+		if (is_null($sClass) || is_null($sSearchKey) || !is_array($aSqlApply) || is_null($sKey) || is_null($sSqlSearch)) {
 			throw new BackgroundTaskExException("Bad parameters: ".var_export($aRule, true));
 		}
 
@@ -117,19 +117,25 @@ class DatabaseService
 			$iProgress = $iMinProgress;
 		}
 
-		if ($iProgress >= $iMaxProgress) {
-			$iProgress = -1;
-			$bCompleted = true;
-		} else {
-			$iMaxKey = $iProgress + $iChunkSize;
-			$sSqlSearch = "$sSqlSearch AND `$sSearchKey` > $iProgress AND `$sSearchKey` <= $iMaxKey";
-
-			$bCompleted = $this->ExecuteSQLQueriesByChunkWithTempTable($sClass, $sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $iChunkSize);
-			if ($bCompleted) {
+		$iMaxKey = $iProgress + $iChunkSize;
+		if (!is_null($iMaxProgress)) {
+			if ($iProgress >= $iMaxProgress) {
 				$iProgress = -1;
-			} else {
-				$iProgress = $iMaxKey;
+				return true;
 			}
+
+			if ($iMaxProgress < $iMaxKey){
+				$iMaxKey = $iMaxProgress;
+			}
+		}
+
+		$sSqlSearch = "$sSqlSearch AND `$sSearchKey` > $iProgress AND `$sSearchKey` <= $iMaxKey";
+
+		$bCompleted = $this->ExecuteSQLQueriesByChunkWithTempTable($sClass, $sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $iChunkSize);
+		if ($bCompleted) {
+			$iProgress = -1;
+		} else {
+			$iProgress = $iMaxKey;
 		}
 
 		return $bCompleted;
