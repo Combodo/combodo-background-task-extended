@@ -129,7 +129,7 @@ class DatabaseService
 			}
 		}
 
-		$sSqlSearch = "$sSqlSearch AND `$sSearchKey` > $iProgress AND `$sSearchKey` <= $iMaxKey";
+		$sSqlSearch = "$sSqlSearch AND `$sSearchKey` >= $iProgress AND `$sSearchKey` <= $iMaxKey";
 
 		$bCompleted = $this->ExecuteSQLQueriesByChunkWithTempTable($sClass, $sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $iChunkSize);
 		if ($bCompleted) {
