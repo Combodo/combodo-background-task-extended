@@ -70,6 +70,12 @@ class MockTestTask extends BackgroundTaskEx
 
 	public function DBWrite()
 	{
+		BackgroundTaskExLog::Info('Task '.$this->Get('name').' is Written to DB');
+	}
+
+	public function DBDelete(&$oDeletionPlan = null)
+	{
+		BackgroundTaskExLog::Info("Task ".$this->Get('name')." is Deleted from DB");
 	}
 
 	/**

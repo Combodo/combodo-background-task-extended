@@ -198,6 +198,12 @@ class BackgroundTaskExService
 							// try to move to the next action
 						}
 						break;
+
+					default:
+						BackgroundTaskExLog::Error("ProcessTask: task: {$oTask->Get('name')} status: $sStatus is unknown => the task is deleted");
+						$sStatus = 'finished';
+						$bInProgress = false;
+						break;
 				}
 
 				if ($bInProgress && !is_null($oAction)) {
