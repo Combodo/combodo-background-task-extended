@@ -16,7 +16,7 @@ class TimeRangeWeeklyScheduledServiceTest extends ItopTestCase
 	protected function setUp(): void
 	{
 		parent::setUp();
-		require_once(__DIR__.'/../../vendor/autoload.php');
+		@require_once APPROOT.'env-production/combodo-background-task-extended/vendor/autoload.php';
 		date_default_timezone_set('UTC');
 		$this->TEST_LOG_FILE = APPROOT.'log/test.log';
 		BackgroundTaskExLog::Enable($this->TEST_LOG_FILE);

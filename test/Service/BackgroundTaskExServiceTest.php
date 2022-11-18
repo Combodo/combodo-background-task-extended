@@ -26,6 +26,7 @@ class BackgroundTaskExServiceTest extends ItopDataTestCase
 	protected function setUp(): void
 	{
 		parent::setUp();
+		@require_once APPROOT.'env-production/combodo-background-task-extended/vendor/autoload.php';
 
 		$this->debug("----- Test ".$this->getName());
 

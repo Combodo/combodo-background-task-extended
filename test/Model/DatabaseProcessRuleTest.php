@@ -24,6 +24,7 @@ class DatabaseProcessRuleTest extends ItopDataTestCase
 	protected function setUp(): void
 	{
 		parent::setUp();
+		@require_once APPROOT.'env-production/combodo-background-task-extended/vendor/autoload.php';
 
 		require_once 'MockDatabaseProcessRule.php';
 
