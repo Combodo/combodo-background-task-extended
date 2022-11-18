@@ -17,12 +17,12 @@ class BackgroundTaskExService
 
 	private $iProcessEndTime;
 
-	public function __construct()
+	public function __construct($sDebugFile = BackgroundTaskExLog::DEBUG_FILE)
 	{
 		$sMaxExecutionTime = MetaModel::GetModuleSetting(BackgroundTaskExHelper::MODULE_NAME, static::MODULE_SETTING_MAX_EXEC_TIME, 30);
 
 		$this->iProcessEndTime = time() + $sMaxExecutionTime;
-		BackgroundTaskExLog::Enable(APPROOT.'log/error.log');
+		BackgroundTaskExLog::Enable($sDebugFile);
 	}
 
 	/**
@@ -140,7 +140,7 @@ class BackgroundTaskExService
 
 							$bCanContinue = $oAction->InitActionParams();
 							if (!$bCanContinue) {
-								BackgroundTaskExLog::Info("ProcessTask: action: {$oAction->Get('friendlyname')} status: $sStatus cannot continue => the action is deleted");
+								BackgroundTaskExLog::Debug("ProcessTask: action: {$oAction->Get('friendlyname')} status: $sStatus cannot continue => the action is deleted");
 								$sStatus = 'finished';
 								$oAction->DBDelete();
 								$oAction = null;
@@ -164,7 +164,7 @@ class BackgroundTaskExService
 
 							$bCanContinue = $oAction->ChangeActionParamsOnError();
 							if (!$bCanContinue) {
-								BackgroundTaskExLog::Info("ProcessTask: action: {$oAction->Get('friendlyname')} recovering failed => the action is deleted");
+								BackgroundTaskExLog::Debug("ProcessTask: action: {$oAction->Get('friendlyname')} recovering failed => the action is deleted");
 								$sStatus = 'finished';
 								$oAction->DBDelete();
 								$oAction = null;

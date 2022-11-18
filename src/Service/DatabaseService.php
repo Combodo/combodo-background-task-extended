@@ -22,9 +22,9 @@ class DatabaseService
 
 	private $aSQLUpdateExtensions;
 
-	public function __construct()
+	public function __construct($sDebugFile = BackgroundTaskExLog::DEBUG_FILE)
 	{
-		BackgroundTaskExLog::Enable(APPROOT.'log/error.log');
+		BackgroundTaskExLog::Enable($sDebugFile);
 		$this->aSQLUpdateExtensions = null;
 		set_time_limit(0);
 	}

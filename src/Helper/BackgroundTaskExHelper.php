@@ -9,8 +9,7 @@ use utils;
 
 class BackgroundTaskExHelper
 {
-	const MODULE_NAME = 'combodo-complex-background-task';
-
+	const MODULE_NAME = 'combodo-background-task-extended';
 
 	/**
 	 * to be removed when minimum compat is 3.0.0
