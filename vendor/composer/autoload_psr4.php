@@ -6,5 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Combodo\\iTop\\BackgroundTaskEx\\Test\\' => array($baseDir . '/test'),
     'Combodo\\iTop\\BackgroundTaskEx\\' => array($baseDir . '/src'),
 );

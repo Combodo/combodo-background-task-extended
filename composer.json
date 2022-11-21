@@ -7,6 +7,11 @@
       "Combodo\\iTop\\BackgroundTaskEx\\": "src"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Combodo\\iTop\\BackgroundTaskEx\\Test\\": "test/"
+    }
+  },
   "name": "combodo/combodo-background-task-extended",
   "type": "itop-extension",
   "description": "Combodo background task extended",

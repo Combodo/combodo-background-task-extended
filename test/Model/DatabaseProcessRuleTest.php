@@ -7,6 +7,7 @@
 namespace Combodo\iTop\BackgroundTaskEx\Test\Model;
 
 use Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExLog;
+use Combodo\iTop\BackgroundTaskEx\Service\DatabaseQueryService;
 use Combodo\iTop\BackgroundTaskEx\Service\DatabaseService;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 
@@ -64,7 +65,8 @@ class DatabaseProcessRuleTest extends ItopDataTestCase
 		$this->assertEquals($sExpKey, $aParams['key']);
 		$this->assertEquals($sExpSearchKey, $aParams['search_key']);
 
-		$aQueries = $oService->BuildQuerySetForTemporaryTable($aParams['search_key'], $aParams['search_query'], $aParams['apply_queries'], $aParams['key'], 'temp');
+		$oQueryService = new DatabaseQueryService();
+		$aQueries = $oQueryService->BuildQuerySetForTemporaryTable($aParams['search_key'], $aParams['search_query'], $aParams['apply_queries'], $aParams['key'], 'temp');
 
 		$this->debug($aQueries);
 	}

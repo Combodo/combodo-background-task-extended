@@ -9,11 +9,16 @@ class ComposerStaticInit618e8d9b0dbca93a1c8a882432ef24bd
     public static $prefixLengthsPsr4 = array (
         'C' => 
         array (
+            'Combodo\\iTop\\BackgroundTaskEx\\Test\\' => 35,
             'Combodo\\iTop\\BackgroundTaskEx\\' => 30,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
+        'Combodo\\iTop\\BackgroundTaskEx\\Test\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/test',
+        ),
         'Combodo\\iTop\\BackgroundTaskEx\\' => 
         array (
             0 => __DIR__ . '/../..' . '/src',
@@ -25,9 +30,16 @@ class ComposerStaticInit618e8d9b0dbca93a1c8a882432ef24bd
         'Combodo\\iTop\\BackgroundTaskEx\\Helper\\BackgroundTaskExHelper' => __DIR__ . '/../..' . '/src/Helper/BackgroundTaskExHelper.php',
         'Combodo\\iTop\\BackgroundTaskEx\\Helper\\BackgroundTaskExLog' => __DIR__ . '/../..' . '/src/Helper/BackgroundTaskExLog.php',
         'Combodo\\iTop\\BackgroundTaskEx\\Service\\BackgroundTaskExService' => __DIR__ . '/../..' . '/src/Service/BackgroundTaskExService.php',
+        'Combodo\\iTop\\BackgroundTaskEx\\Service\\DatabaseQueryService' => __DIR__ . '/../..' . '/src/Service/DatabaseQueryService.php',
         'Combodo\\iTop\\BackgroundTaskEx\\Service\\DatabaseService' => __DIR__ . '/../..' . '/src/Service/DatabaseService.php',
         'Combodo\\iTop\\BackgroundTaskEx\\Service\\TimeRangeWeeklyScheduledService' => __DIR__ . '/../..' . '/src/Service/TimeRangeWeeklyScheduledService.php',
         'Combodo\\iTop\\BackgroundTaskEx\\Service\\iSQLUpdateExtension' => __DIR__ . '/../..' . '/src/Service/iSQLUpdateExtension.php',
+        'Combodo\\iTop\\BackgroundTaskEx\\Test\\Model\\DatabaseProcessRuleTest' => __DIR__ . '/../..' . '/test/Model/DatabaseProcessRuleTest.php',
+        'Combodo\\iTop\\BackgroundTaskEx\\Test\\Service\\BackgroundTaskExServiceTest' => __DIR__ . '/../..' . '/test/Service/BackgroundTaskExServiceTest.php',
+        'Combodo\\iTop\\BackgroundTaskEx\\Test\\Service\\DatabaseQueryServiceTest' => __DIR__ . '/../..' . '/test/Service/DatabaseQueryServiceTest.php',
+        'Combodo\\iTop\\BackgroundTaskEx\\Test\\Service\\DatabaseServiceTest' => __DIR__ . '/../..' . '/test/Service/DatabaseServiceTest.php',
+        'Combodo\\iTop\\BackgroundTaskEx\\Test\\Service\\QueryInjection' => __DIR__ . '/../..' . '/test/Service/QueryInjection.php',
+        'Combodo\\iTop\\BackgroundTaskEx\\Test\\Service\\TimeRangeWeeklyScheduledServiceTest' => __DIR__ . '/../..' . '/test/Service/TimeRangeWeeklyScheduledServiceTest.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
     );
 
