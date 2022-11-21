@@ -17,7 +17,7 @@ class DatabaseServiceTest extends ItopDataTestCase {
 	/** @var DatabaseQueryService */
 	private $oDatabaseQueryService;
 
-	protected function setUp() {
+	protected function setUp() : void {
 		parent::setUp();
 		require_once(APPROOT.'/env-production/combodo-background-task-extended/vendor/autoload.php');
 

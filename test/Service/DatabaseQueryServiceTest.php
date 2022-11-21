@@ -11,7 +11,7 @@ class DatabaseQueryServiceTest extends ItopTestCase {
 	/** @var QueryInjection */
 	private $oMySQLiMock;
 
-	protected function setUp() {
+	protected function setUp() : void {
 		parent::setUp();
 		require_once('QueryInjection.php');
 		require_once(APPROOT.'/core/cmdbsource.class.inc.php');
