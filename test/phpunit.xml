@@ -18,17 +18,8 @@
         verbose="true"
         printerClass="Sempro\PHPUnitPrettyPrinter\PrettyPrinter"
 >
-
   <php>
-    <ini name="error_reporting" value="E_ALL"/>
-    <ini name="display_errors" value="On"/>
-    <ini name="log_errors" value="On"/>
-    <ini name="html_errors" value="Off"/>
-    <env name="PHPUNIT_PRETTY_PRINT_PROGRESS" value="true"/>
-  </php>
-
-  <php>
-    <ini name="error_reporting" value="E_ALL"/>
+    <ini name="error_reporting" value="E_ALL ^ E_WARNING"/>
     <ini name="display_errors" value="On"/>
     <ini name="log_errors" value="On"/>
     <ini name="html_errors" value="Off"/>
