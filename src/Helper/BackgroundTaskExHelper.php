@@ -22,7 +22,7 @@ class BackgroundTaskExHelper
 	public function GetClassesForInterface(string $sInterface, string $sClassNameFilter = ''): array
 	{
 		$aMatchingClasses = [];
-		$aExcludedPath = ['[\\\\/]lib[\\\\/]', '[\\\\/]core[\\\\/]oql[\\\\/]', '[\\\\/]node_modules[\\\\/]', '[\\\\/]datamodels[\\\\/]', '[\\\\/]itop-oauth-client[\\\\/]', '[\\\\/]test[\\\\/]'];
+		$aExcludedPath = ['[\\\\/]lib[\\\\/]', '[\\\\/]core[\\\\/]oql[\\\\/]', '[\\\\/]node_modules[\\\\/]', '[\\\\/]datamodels[\\\\/]', '[\\\\/]itop-oauth-client[\\\\/]', '[\\\\/]test[\\\\/]', '[\\\\/]tests[\\\\/]'];
 
 		if (!utils::IsDevelopmentEnvironment()) {
 			// Try to read from cache
@@ -56,12 +56,18 @@ class BackgroundTaskExHelper
 				if ($sClassNameFilter !== '' && strpos($sPHPClass, $sClassNameFilter) === false) {
 					$bSkipped = true;
 				} else {
-					foreach ($aExcludedPath as $sExcludedPath) {
-						// Note: We use '#' as delimiters as usual '/' is often used in paths.
-						if ($sExcludedPath !== '' && preg_match('#'.$sExcludedPath.'#', $sPHPFile) === 1) {
-							$bSkipped = true;
-							break;
+					$sPHPFile = utils::LocalPath($sPHPFile);
+					if ($sPHPFile !== false) {
+						$sPHPFile = '/'.$sPHPFile; // for regex
+						foreach ($aExcludedPath as $sExcludedPath) {
+							// Note: We use '#' as delimiters as usual '/' is often used in paths.
+							if ($sExcludedPath !== '' && preg_match('#'.$sExcludedPath.'#', $sPHPFile) === 1) {
+								$bSkipped = true;
+								break;
+							}
 						}
+					} else {
+						$bSkipped = true; // file not found
 					}
 				}
 
@@ -86,5 +92,4 @@ class BackgroundTaskExHelper
 
 		return $aMatchingClasses;
 	}
-
 }
