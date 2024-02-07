@@ -22,7 +22,7 @@ class BackgroundTaskExHelper
 	public function GetClassesForInterface(string $sInterface, string $sClassNameFilter = ''): array
 	{
 		$aMatchingClasses = [];
-		$aExcludedPath = ['[\\\\/]lib[\\\\/]', '[\\\\/]core[\\\\/]oql[\\\\/]', '[\\\\/]node_modules[\\\\/]', '[\\\\/]datamodels[\\\\/]', '[\\\\/]itop-oauth-client[\\\\/]', '[\\\\/]test[\\\\/]', '[\\\\/]tests[\\\\/]'];
+		$aExcludedPath = ['[\\\\/]lib[\\\\/]', '[\\\\/]core[\\\\/]oql[\\\\/]', '[\\\\/]node_modules[\\\\/]', '[\\\\/]datamodels[\\\\/]', '[\\\\/]itop-oauth-client[\\\\/]', '[\\\\/]test[\\\\/]', '[\\\\/]tests[\\\\/]','[\\\\/]core[\\\\/]apc-emulation'];
 
 		if (!utils::IsDevelopmentEnvironment()) {
 			// Try to read from cache
