@@ -8,8 +8,9 @@ namespace Combodo\iTop\BackgroundTaskEx\Service;
 
 use CMDBSource;
 use Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExException;
-use Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExHelper;
 use Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExLog;
+use Combodo\iTop\BackgroundTaskEx\Hook\iSQLUpdateExtension;
+use Combodo\iTop\Service\InterfaceDiscovery\InterfaceDiscovery;
 use DatabaseProcessRule;
 use DBSearch;
 use Exception;
@@ -336,8 +337,7 @@ class DatabaseService
 	private function GetSQLUpdateExtensions()
 	{
 		if (is_null($this->aSQLUpdateExtensions)) {
-			$oBackgroundTaskExHelper = new BackgroundTaskExHelper();
-			$this->aSQLUpdateExtensions = $oBackgroundTaskExHelper->GetClassesForInterface(iSQLUpdateExtension::class);
+			$this->aSQLUpdateExtensions = InterfaceDiscovery::GetInstance()->FindItopClasses(iSQLUpdateExtension::class);
 		}
 
 		return $this->aSQLUpdateExtensions;

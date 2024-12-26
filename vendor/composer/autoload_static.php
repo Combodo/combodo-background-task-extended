@@ -20,14 +20,20 @@ class ComposerStaticInit618e8d9b0dbca93a1c8a882432ef24bd
         ),
     );
 
+    public static $fallbackDirsPsr4 = array (
+        0 => __DIR__ . '/../..' . '/src/Model',
+    );
+
     public static $classMap = array (
+        'AbstractBackgroundTaskExAction' => __DIR__ . '/../..' . '/src/Model/AbstractBackgroundTaskExAction.php',
+        'AbstractTimeRangeWeeklyScheduledProcess' => __DIR__ . '/../..' . '/src/Model/AbstractTimeRangeWeeklyScheduledProcess.php',
         'Combodo\\iTop\\BackgroundTaskEx\\Helper\\BackgroundTaskExException' => __DIR__ . '/../..' . '/src/Helper/BackgroundTaskExException.php',
         'Combodo\\iTop\\BackgroundTaskEx\\Helper\\BackgroundTaskExHelper' => __DIR__ . '/../..' . '/src/Helper/BackgroundTaskExHelper.php',
         'Combodo\\iTop\\BackgroundTaskEx\\Helper\\BackgroundTaskExLog' => __DIR__ . '/../..' . '/src/Helper/BackgroundTaskExLog.php',
+        'Combodo\\iTop\\BackgroundTaskEx\\Hook\\iSQLUpdateExtension' => __DIR__ . '/../..' . '/src/Hook/iSQLUpdateExtension.php',
         'Combodo\\iTop\\BackgroundTaskEx\\Service\\BackgroundTaskExService' => __DIR__ . '/../..' . '/src/Service/BackgroundTaskExService.php',
         'Combodo\\iTop\\BackgroundTaskEx\\Service\\DatabaseService' => __DIR__ . '/../..' . '/src/Service/DatabaseService.php',
         'Combodo\\iTop\\BackgroundTaskEx\\Service\\TimeRangeWeeklyScheduledService' => __DIR__ . '/../..' . '/src/Service/TimeRangeWeeklyScheduledService.php',
-        'Combodo\\iTop\\BackgroundTaskEx\\Service\\iSQLUpdateExtension' => __DIR__ . '/../..' . '/src/Service/iSQLUpdateExtension.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
     );
 
@@ -36,6 +42,7 @@ class ComposerStaticInit618e8d9b0dbca93a1c8a882432ef24bd
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit618e8d9b0dbca93a1c8a882432ef24bd::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit618e8d9b0dbca93a1c8a882432ef24bd::$prefixDirsPsr4;
+            $loader->fallbackDirsPsr4 = ComposerStaticInit618e8d9b0dbca93a1c8a882432ef24bd::$fallbackDirsPsr4;
             $loader->classMap = ComposerStaticInit618e8d9b0dbca93a1c8a882432ef24bd::$classMap;
 
         }, null, ClassLoader::class);

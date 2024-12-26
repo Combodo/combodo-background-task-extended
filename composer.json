@@ -4,7 +4,8 @@
   },
   "autoload": {
     "psr-4": {
-      "Combodo\\iTop\\BackgroundTaskEx\\": "src"
+      "Combodo\\iTop\\BackgroundTaskEx\\": "src",
+      "": "src/Model"
     }
   },
   "name": "combodo/combodo-background-task-extended",

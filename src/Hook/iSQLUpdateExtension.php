@@ -4,7 +4,7 @@
  * @license     http://opensource.org/licenses/AGPL-3.0
  */
 
-namespace Combodo\iTop\BackgroundTaskEx\Service;
+namespace Combodo\iTop\BackgroundTaskEx\Hook;
 
 interface iSQLUpdateExtension
 {
