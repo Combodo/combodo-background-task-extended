@@ -6,8 +6,10 @@ use LogAPI;
 
 class BackgroundTaskExLog extends LogAPI
 {
-	const CHANNEL_DEFAULT = 'BackgroundTaskEx';
+	public const CHANNEL_DEFAULT = 'BackgroundTaskEx';
     protected static $m_oFileLog = null;
+
+    public const DEBUG_FILE = APPROOT.'log/error.log';
 
     public static function Enable($sTargetFile = null)
     {

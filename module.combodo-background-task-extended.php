@@ -5,7 +5,7 @@
 
 SetupWebPage::AddModule(
 	__FILE__, // Path to the current file, all other file names are relative to the directory containing this file
-	'combodo-background-task-extended/1.0.1',
+	'combodo-background-task-extended/1.0.2',
 	[
 		// Identification
 		//
@@ -15,6 +15,7 @@ SetupWebPage::AddModule(
 		// Setup
 		//
 		'dependencies' => [
+            'itop-structure/3.2.0',
 		],
 		'mandatory' => false,
 		'visible' => true,
