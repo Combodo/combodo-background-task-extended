@@ -129,7 +129,7 @@ class DatabaseService
 			$iMaxKey = $iMaxProgress;
 		}
 
-		$sSqlSearch = "$sSqlSearch AND `$sSearchKey` >= $iProgress AND `$sSearchKey` <= $iMaxKey";
+		$sSqlSearch = "$sSqlSearch AND $sSearchKey >= $iProgress AND $sSearchKey <= $iMaxKey";
 
 		$bCompleted = $this->ExecuteSQLQueriesByChunkWithTempTable($sClass, $sSearchKey, $sSqlSearch, $aSqlApply, $sKey, $iChunkSize);
 		if ($bCompleted) {
@@ -176,7 +176,7 @@ class DatabaseService
 				$this->DebugDuration($fStart, '');
 			}
 
-			$oResult = CMDBSource::Query("SELECT COUNT(*) AS COUNT, MAX(`$sSearchKey`) AS MAX FROM `$sTempTable`");
+			$oResult = CMDBSource::Query("SELECT COUNT(*) AS COUNT, MAX($sKey) AS MAX FROM `$sTempTable`");
 			$aRow = $oResult->fetch_assoc();
 			$iCount = $aRow['COUNT'];
 			$sId = $aRow['MAX'];
@@ -196,7 +196,7 @@ class DatabaseService
 			CMDBSource::Query('COMMIT');
 
 			if (count($aExtensions) > 0) {
-				$oResult = CMDBSource::Query("SELECT `$sSearchKey` FROM `$sTempTable`");
+				$oResult = CMDBSource::Query("SELECT $sSearchKey FROM $sTempTable");
 				$aObjects = [];
 				while ($oRaw = $oResult->fetch_assoc()) {
 					$sId = $oRaw[$sSearchKey];
@@ -272,7 +272,7 @@ class DatabaseService
 		$aApplyQueries = [];
 		foreach ($aSqlApply as $sTable => $sSqlUpdate) {
 			$sPattern = "@/\*JOIN\*/@";
-			$sReplacement = "INNER JOIN `$sTempTable` ON `$sTable`.`$sKey` = `$sTempTable`.`$sSearchKey`";
+			$sReplacement = "INNER JOIN `$sTempTable` ON `$sTable`.`$sKey` = `$sTempTable`.`$sKey`";
 			$iCount = 0;
 			$sQuery = preg_replace($sPattern, $sReplacement, $sSqlUpdate, 1, $iCount);
 			if ($iCount == 1) {
