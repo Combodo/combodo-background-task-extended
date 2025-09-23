@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<itop_design xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.7">
+<itop_design xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.2">
   <classes>
     <class id="BackgroundTaskEx" _delta="define">
       <parent>DBObject</parent>
@@ -38,21 +38,27 @@
           <is_null_allowed>false</is_null_allowed>
           <default_value>created</default_value>
           <tracking_level>none</tracking_level>
+          <sort_type>rank</sort_type>
           <values>
             <value id="created">
               <code>created</code>
+              <rank>1</rank>
             </value>
             <value id="starting">
               <code>starting</code>
+              <rank>2</rank>
             </value>
             <value id="running">
               <code>running</code>
+              <rank>3</rank>
             </value>
             <value id="recovering">
               <code>recovering</code>
+              <rank>4</rank>
             </value>
             <value id="paused">
               <code>paused</code>
+              <rank>5</rank>
             </value>
           </values>
         </field>
@@ -254,8 +260,12 @@
         </field>
         <field id="status" xsi:type="AttributeEnum">
           <values>
-            <value id="active">active</value>
-            <value id="inactive">inactive</value>
+            <value id="active">
+                <code>active</code>
+            </value>
+            <value id="inactive">
+                <code>inactive</code>
+            </value>
           </values>
           <sql>status</sql>
           <default_value>active</default_value>
@@ -264,8 +274,12 @@
         </field>
         <field id="type" xsi:type="AttributeEnum">
           <values>
-            <value id="simple">simple</value>
-            <value id="advanced">advanced</value>
+            <value id="simple">
+                <code>simple</code>
+            </value>
+            <value id="advanced">
+                <code>advanced</code>
+            </value>
           </values>
           <dependencies>
             <attribute id="date_to_check_att"/>
