@@ -2,7 +2,6 @@
 
 namespace Combodo\iTop\BackgroundTaskEx\Helper;
 
-use Combodo\iTop\Oauth2Client\Helper\Oauth2ClientLog;
 use Exception;
 use Throwable;
 
@@ -20,7 +19,7 @@ class BackgroundTaskExException extends Exception
 
         $aContext['error'] = $sError;
         $aContext['stack'] = $sStack;
-        Oauth2ClientLog::Error($message, null, $aContext);
+        BackgroundTaskExLog::Error($message, null, $aContext);
         parent::__construct($message, $code, $previous);
     }
 }
