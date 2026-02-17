@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   Copyright (C) 2010-2024 Combodo SAS
  * @license     http://opensource.org/licenses/AGPL-3.0
@@ -19,7 +20,7 @@ use MySQLHasGoneAwayException;
 
 class DatabaseService
 {
-	const TEMPORARY_TABLE = 'priv_temporary_ids_';
+	public const TEMPORARY_TABLE = 'priv_temporary_ids_';
 
 	private $aSQLUpdateExtensions;
 
@@ -216,8 +217,7 @@ class DatabaseService
 
 			BackgroundTaskExLog::Debug($aQueries['cleanup']);
 			CMDBSource::Query($aQueries['cleanup']);
-		}
-		catch (MySQLHasGoneAwayException $e) {
+		} catch (MySQLHasGoneAwayException $e) {
 			// Allow to retry the same set
 			BackgroundTaskExLog::Error('ROLLBACK: '.$e->getMessage());
 			CMDBSource::Query('ROLLBACK');
@@ -226,8 +226,7 @@ class DatabaseService
 				throw new BackgroundTaskExException($e->getMessage());
 			}
 			throw $e;
-		}
-		catch (Exception $e) {
+		} catch (Exception $e) {
 			BackgroundTaskExLog::Error('ROLLBACK: '.$e->getMessage());
 			CMDBSource::Query('ROLLBACK');
 			if ($iChunkSize == 1) {
@@ -366,7 +365,8 @@ class DatabaseService
 		$aObjects = [];
 		if ($oResult->num_rows > 0) {
 			while ($oRaw = $oResult->fetch_assoc()) {
-				$aObjects[] = $oRaw[$sKey];;
+				$aObjects[] = $oRaw[$sKey];
+				;
 			}
 		}
 

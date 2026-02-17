@@ -1,16 +1,16 @@
 <?php
+
 /*
  * @copyright   Copyright (C) 2010-2024 Combodo SAS
  * @license     http://opensource.org/licenses/AGPL-3.0
  */
-
 
 use Combodo\iTop\BackgroundTaskEx\Helper\BackgroundTaskExHelper;
 use Combodo\iTop\BackgroundTaskEx\Service\TimeRangeWeeklyScheduledService;
 
 abstract class AbstractTimeRangeWeeklyScheduledProcess extends AbstractWeeklyScheduledProcess
 {
-	const MODULE_SETTING_MAX_TIME = 'end_time';
+	public const MODULE_SETTING_MAX_TIME = 'end_time';
 
 	protected function GetModuleName()
 	{
@@ -22,7 +22,8 @@ abstract class AbstractTimeRangeWeeklyScheduledProcess extends AbstractWeeklySch
 	 *
 	 * @return string
 	 */
-	protected function GetDefaultModuleSettingTime(){
+	protected function GetDefaultModuleSettingTime()
+	{
 		return MetaModel::GetConfig()->GetModuleSetting($this->GetModuleName(), static::MODULE_SETTING_TIME, '01:30');
 	}
 
@@ -31,8 +32,9 @@ abstract class AbstractTimeRangeWeeklyScheduledProcess extends AbstractWeeklySch
 	 *
 	 * @return string
 	 */
-	protected function GetDefaultModuleSettingEndTime(){
-		return MetaModel::GetModuleSetting($this->GetModuleName(), static::MODULE_SETTING_MAX_TIME, '05:00');
+	protected function GetDefaultModuleSettingEndTime()
+	{
+		return MetaModel::GetModuleSetting($this->GetModuleName(), static::MODULE_SETTING_MAX_TIME, '20:00');
 	}
 
 	/**

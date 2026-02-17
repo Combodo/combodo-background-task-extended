@@ -13,7 +13,7 @@ use MetaModel;
 
 class BackgroundTaskExService
 {
-	const MODULE_SETTING_MAX_EXEC_TIME = 'max_execution_time';
+	public const MODULE_SETTING_MAX_EXEC_TIME = 'max_execution_time';
 
 	private $iProcessEndTime;
 
@@ -67,8 +67,7 @@ class BackgroundTaskExService
 			} else {
 				return false;
 			}
-		}
-		finally {
+		} finally {
 			$oMutex->Unlock();
 		}
 	}
@@ -226,8 +225,7 @@ class BackgroundTaskExService
 					}
 					BackgroundTaskExLog::Debug("ProcessTask: action: $sAction status: $sStatus, end");
 				}
-			}
-			catch (Exception $e) {
+			} catch (Exception $e) {
 				// stay in 'previous' status
 				BackgroundTaskExLog::Error($e->getMessage());
 				$bInProgress = false;
@@ -249,6 +247,5 @@ class BackgroundTaskExService
 	{
 		$this->iProcessEndTime = $iProcessEndTime;
 	}
-
 
 }

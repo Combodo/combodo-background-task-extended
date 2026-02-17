@@ -1,4 +1,5 @@
 <?php
+
 /*
  * @copyright   Copyright (C) 2010-2024 Combodo SAS
  * @license     http://opensource.org/licenses/AGPL-3.0
@@ -11,7 +12,6 @@ use Combodo\iTop\BackgroundTaskEx\Service\BackgroundTaskExService;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 use MetaModel;
 
-
 /**
  * @runTestsInSeparateProcesses
  * @preserveGlobalState disabled
@@ -19,8 +19,8 @@ use MetaModel;
  */
 class BackgroundTaskExServiceTest extends ItopDataTestCase
 {
-	const USE_TRANSACTION = true;
-	const CREATE_TEST_ORG = false;
+	public const USE_TRANSACTION = true;
+	public const CREATE_TEST_ORG = false;
 	private $TEST_LOG_FILE;
 
 	protected function setUp(): void
@@ -36,7 +36,6 @@ class BackgroundTaskExServiceTest extends ItopDataTestCase
 		\MockTestTask::Init();
 		\MockTestAction::Init();
 
-
 		$this->TEST_LOG_FILE = APPROOT.'log/test.log';
 		BackgroundTaskExLog::Enable($this->TEST_LOG_FILE);
 		@unlink($this->TEST_LOG_FILE);
@@ -50,7 +49,6 @@ class BackgroundTaskExServiceTest extends ItopDataTestCase
 		}
 		parent::tearDown();
 	}
-
 
 	/**
 	 * @dataProvider ProcessOneTaskProvider

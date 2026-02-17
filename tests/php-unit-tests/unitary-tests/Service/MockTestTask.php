@@ -23,7 +23,7 @@ class MockTestTask extends BackgroundTaskEx
 			'db_finalclass_field' => 'finalclass',
 		];
 		MetaModel::Init_Params($aParams);
-		MetaModel::Init_AddAttribute(new AttributeText('action_params', array('allowed_values' => null, 'sql' => 'action_params', 'default_value' => '', 'is_null_allowed' => true, 'depends_on' => array(), 'always_load_in_tables' => false, 'tracking_level' => ATTRIBUTE_TRACKING_NONE)));
+		MetaModel::Init_AddAttribute(new AttributeText('action_params', ['allowed_values' => null, 'sql' => 'action_params', 'default_value' => '', 'is_null_allowed' => true, 'depends_on' => [], 'always_load_in_tables' => false, 'tracking_level' => ATTRIBUTE_TRACKING_NONE]));
 		MetaModel::Init_InheritAttributes();
 
 		MetaModel::Init_SetZListItems('list', [

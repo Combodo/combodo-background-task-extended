@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   Copyright (C) 2010-2024 Combodo SAS
  * @license     http://opensource.org/licenses/AGPL-3.0
@@ -16,7 +17,7 @@ class TimeRangeWeeklyScheduledService
 	private $sEndTime;
 	private $aDays;
 
-	const WEEK_DAY_TO_N = array(
+	public const WEEK_DAY_TO_N = [
 		'monday'    => 1,
 		'tuesday'   => 2,
 		'wednesday' => 3,
@@ -24,7 +25,7 @@ class TimeRangeWeeklyScheduledService
 		'friday'    => 5,
 		'saturday'  => 6,
 		'sunday'    => 7,
-	);
+	];
 
 	/**
 	 * @param int $iCurrentTime
@@ -228,7 +229,7 @@ class TimeRangeWeeklyScheduledService
 	 */
 	public function WeekDaysToNumeric(string $sWeekDays)
 	{
-		$aDays = array();
+		$aDays = [];
 
 		if ($sWeekDays !== '') {
 			$aWeekDaysRaw = explode(',', $sWeekDays);
