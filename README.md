@@ -49,19 +49,19 @@ The `BackgroundTaskExService` class manages the execution of extended background
 
 The `BackgroundTaskExAction` class:
 
-- **InitActionParams**: Initializes the action and saves specific data. Returns `true` if the action can continue. Used to set up any parameters before execution.
+- **InitActionParams()**: Initializes the action and saves specific data. Returns `true` if the action can continue. Used to set up any parameters before execution.
 
-- **ChangeActionParamsOnError**: Modifies the action's parameters if an error occurs, to allow a retry. Returns `true` if the action can continue after the change.
+- **ChangeActionParamsOnError()**: Modifies the action's parameters if an error occurs, to allow a retry. Returns `true` if the action can continue after the change.
 
-- **ExecuteAction**: Executes the action using the current parameters. Receives the end execution time as a parameter. Returns `true` if the action is finished, or `false` if it needs to pause (for example, if the execution timeout is reached).
+- **ExecuteAction()**: Executes the action using the current parameters. Receives the end execution time as a parameter. Returns `true` if the action is finished, or `false` if it needs to pause (for example, if the execution timeout is reached).
 
 These methods allow each action to be initialized, retried on error, and executed in a controlled way within a background task.
 
 
 The `BackgroundTaskEx` class:
 
-- **GetCurrentAction**: Returns the current action object (`BackgroundTaskExAction`) associated with this task, or `null` if none is set.
+- **GetCurrentAction()**: Returns the current action object (`BackgroundTaskExAction`) associated with this task, or `null` if none is set.
 
-- **GetNextAction**: Finds the next action to execute for this task (ordered by rank), sets it as the current action, updates the task, and returns the action object.
+- **GetNextAction()**: Finds the next action to execute for this task (ordered by rank), sets it as the current action, updates the task, and returns the action object.
 
 These methods help manage the sequence of actions within an extended background task.
